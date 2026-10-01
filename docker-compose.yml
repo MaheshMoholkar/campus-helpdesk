@@ -1,0 +1,29 @@
+# Local alternative to the homelab: Postgres with pgvector, and the Phoenix trace viewer.
+#   docker compose up -d postgres            # database only
+#   docker compose --profile tracing up -d   # database + Phoenix
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: helpdesk
+      POSTGRES_PASSWORD: helpdesk
+      POSTGRES_DB: helpdesk
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helpdesk -d helpdesk"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    profiles: ["tracing"]
+    ports:
+      - "6006:6006"   # UI and OTLP over HTTP
+
+volumes:
+  pgdata:

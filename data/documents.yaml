@@ -1,0 +1,522 @@
+# Invented documents for Navrang University, written from plan.yaml.
+# Nothing here describes a real institution.
+
+- slug: all-admissions-faq-2026
+  title: Admissions FAQ 2027-28
+  doc_type: faq
+  college_code: all
+  audience: public
+  category: admission
+  issue_date: 2026-09-01
+  body: |
+    # Admissions FAQ 2027-28
+
+    ## When do applications open?
+    Applications for admission to the 2027-28 academic year open on 1 December 2026 and close on 31 March 2027. Applications are accepted only through the university admissions portal.
+
+    ## What is the application fee?
+    The application fee is Rs 800. Candidates from reserved categories pay Rs 400. The fee is not refundable.
+
+    ## How is the merit list prepared?
+    Undergraduate merit lists are prepared from the qualifying examination marks. Engineering admissions also use the state entrance test score, weighted at 50 percent.
+
+    ## Can I apply to more than one college?
+    Yes. One application form lets a candidate list up to three colleges of Navrang University in order of preference.
+
+- slug: all-campus-faq
+  title: About the Campus - FAQ
+  doc_type: faq
+  college_code: all
+  audience: public
+  category: general
+  issue_date: 2026-07-01
+  body: |
+    # About the Campus
+
+    ## Which colleges are on campus?
+    Navrang University in Sahyadri Nagar has three colleges: the Navrang College of Engineering (COE), the Navrang College of Arts and Science (CAS) and the Navrang College of Commerce and Management (COM).
+
+    ## What are the central library timings?
+    The central library is open from 08:00 to 22:00 on working days and from 09:00 to 17:00 on Sundays. It is closed on university holidays.
+
+    ## Is there a medical centre?
+    The campus health centre near Gate 2 is open 24 hours. A doctor is available from 09:00 to 21:00.
+
+- slug: all-exam-policy-2026
+  title: Examination Policy
+  doc_type: policy
+  college_code: all
+  audience: public
+  category: exam
+  issue_date: 2026-06-15
+  reference_no: NU/EXAM/POL/2026/01
+  body: |
+    # Examination Policy
+
+    ## Eligibility
+    A student must have at least 75 percent attendance in each course to sit the end-semester examination in that course. Students below 75 percent may apply to the Principal for condonation on medical grounds; condonation is never granted below 65 percent.
+
+    ## Hall tickets
+    Hall tickets are issued through the student portal. A student without a hall ticket and college ID card will not be allowed into the examination hall.
+
+    ## Revaluation
+    A student may apply for revaluation within 7 days of the declaration of results. The revaluation fee is Rs 500 per paper. Revaluation results are declared within 30 days.
+
+    ## Malpractice
+    Any student found using unfair means will have the examination in that course cancelled and will be referred to the Unfair Means Committee.
+
+- slug: all-fee-policy-2026
+  title: Fee Payment and Refund Policy
+  doc_type: policy
+  college_code: all
+  audience: public
+  category: fee
+  issue_date: 2026-06-15
+  reference_no: NU/ACC/POL/2026/02
+  body: |
+    # Fee Payment and Refund Policy
+
+    ## Payment
+    Fees are paid online through the student portal by UPI, net banking or card. Each college announces its own fee amounts and due dates in a fee circular.
+
+    ## Late fee
+    A late fee of Rs 100 per day is charged after the due date, up to a maximum of Rs 2,000. A student whose fee is unpaid 30 days after the due date may be barred from examinations.
+
+    ## Refunds
+    Fees are refunded in full only if the admission is cancelled before the term starts. After the term starts, 50 percent is refunded if cancelled within 15 days, and nothing thereafter.
+
+- slug: all-hostel-policy-2026
+  title: Hostel Rules
+  doc_type: policy
+  college_code: all
+  audience: public
+  category: hostel
+  issue_date: 2026-06-20
+  body: |
+    # Hostel Rules
+
+    ## Gate timings
+    Hostel gates close at 22:00 for all residents. Late entry requires prior written permission from the warden.
+
+    ## Mess
+    Breakfast is served from 07:30 to 09:00, lunch from 12:30 to 14:00 and dinner from 19:30 to 21:00. Mess charges are included in the hostel fee.
+
+    ## Rooms
+    Rooms are allotted for one academic year. Cooking appliances are not allowed in rooms.
+
+- slug: hostel-fee-2025-26
+  title: Hostel Fee Notice 2025-26
+  doc_type: circular
+  college_code: all
+  audience: public
+  category: hostel
+  issue_date: 2025-06-01
+  series_key: hostel-fee
+  version: 1
+  reference_no: NU/HOSTEL/2025/04
+  body: |
+    # Hostel Fee Notice 2025-26
+
+    The annual hostel fee for the academic year 2025-26 is Rs 55,000, including mess charges. The fee is payable in one instalment by 31 July 2025.
+
+- slug: hostel-fee-2026-27
+  title: Hostel Fee Notice 2026-27
+  doc_type: circular
+  college_code: all
+  audience: public
+  category: hostel
+  issue_date: 2026-06-01
+  series_key: hostel-fee
+  version: 2
+  reference_no: NU/HOSTEL/2026/03
+  body: |
+    # Hostel Fee Notice 2026-27
+
+    This notice supersedes the hostel fee notice for 2025-26. The annual hostel fee for the academic year 2026-27 is Rs 58,000, including mess charges. The fee is payable in one instalment by 31 July 2026.
+
+- slug: coe-fee-structure-2026-v1
+  title: COE Fee Structure - Semester 3, 2026-27
+  doc_type: circular
+  college_code: coe
+  audience: student
+  category: fee
+  issue_date: 2026-06-10
+  series_key: coe-fee-structure-2026
+  version: 1
+  reference_no: COE/ACC/2026/11
+  body: |
+    # COE Fee Structure - Semester 3, 2026-27
+
+    The tuition fee for semester 3 of the B.Tech programme is Rs 62,000. The last date to pay the semester 3 fee is 31 October 2026. Pay through the student portal.
+
+- slug: coe-fee-structure-2026-v2
+  title: Revised COE Fee Structure - Semester 3, 2026-27
+  doc_type: circular
+  college_code: coe
+  audience: student
+  category: fee
+  issue_date: 2026-08-20
+  series_key: coe-fee-structure-2026
+  version: 2
+  reference_no: COE/ACC/2026/19
+  body: |
+    # Revised COE Fee Structure - Semester 3, 2026-27
+
+    This circular supersedes circular COE/ACC/2026/11. Following the revision approved by the Governing Council, the tuition fee for semester 3 of the B.Tech programme is Rs 64,500. The last date to pay the semester 3 fee is extended to 15 November 2026. Students who have already paid Rs 62,000 must pay the difference of Rs 2,500 by the same date.
+
+- slug: cas-fee-structure-2026
+  title: CAS Fee Circular - Odd Semester 2026-27
+  doc_type: circular
+  college_code: cas
+  audience: student
+  category: fee
+  issue_date: 2026-07-05
+  reference_no: CAS/ACC/2026/07
+  body: |
+    # CAS Fee Circular - Odd Semester 2026-27
+
+    The semester fee for all B.A. and B.Sc. programmes for the odd semester is Rs 38,000. The last date to pay the semester fee is 10 November 2026.
+
+- slug: com-fee-structure-2026
+  title: COM Fee Circular - Odd Semester 2026-27
+  doc_type: circular
+  college_code: com
+  audience: student
+  category: fee
+  issue_date: 2026-07-05
+  reference_no: COM/ACC/2026/05
+  body: |
+    # COM Fee Circular - Odd Semester 2026-27
+
+    The semester fee for the B.Com and BBA programmes for the odd semester is Rs 42,000. The last date to pay the semester fee is 12 November 2026.
+
+- slug: coe-exam-schedule-odd-2026
+  title: COE End-Semester Examination Schedule - Odd Semester 2026
+  doc_type: circular
+  college_code: coe
+  audience: student
+  category: exam
+  issue_date: 2026-09-15
+  expires_on: 2026-12-31
+  reference_no: COE/EXAM/2026/08
+  body: |
+    # COE End-Semester Examination Schedule - Odd Semester 2026
+
+    End-semester examinations for all B.Tech years begin on 1 December 2026. Hall tickets will be available on the student portal from 20 November 2026. The detailed paper-wise timetable is attached on the portal.
+
+- slug: cas-exam-schedule-odd-2026
+  title: CAS End-Semester Examination Schedule - Odd Semester 2026
+  doc_type: circular
+  college_code: cas
+  audience: student
+  category: exam
+  issue_date: 2026-09-18
+  expires_on: 2026-12-31
+  reference_no: CAS/EXAM/2026/06
+  body: |
+    # CAS End-Semester Examination Schedule - Odd Semester 2026
+
+    End-semester examinations for B.A. and B.Sc. programmes begin on 5 December 2026. Hall tickets will be issued from 25 November 2026.
+
+- slug: com-exam-schedule-odd-2026
+  title: COM End-Semester Examination Schedule - Odd Semester 2026
+  doc_type: circular
+  college_code: com
+  audience: student
+  category: exam
+  issue_date: 2026-09-18
+  expires_on: 2026-12-31
+  reference_no: COM/EXAM/2026/04
+  body: |
+    # COM End-Semester Examination Schedule - Odd Semester 2026
+
+    End-semester examinations for B.Com and BBA programmes begin on 3 December 2026. Hall tickets will be issued from 23 November 2026.
+
+- slug: coe-invigilation-duty-2026
+  title: Invigilation Duties - COE Odd Semester Examinations 2026
+  doc_type: circular
+  college_code: coe
+  audience: staff
+  category: exam
+  issue_date: 2026-09-25
+  reference_no: COE/EXAM/STAFF/2026/02
+  body: |
+    # Invigilation Duties - COE Odd Semester Examinations 2026
+
+    All teaching staff of COE are assigned invigilation duties during the end-semester examinations. Invigilators must report to the examination control room 30 minutes before each session. The invigilation remuneration is Rs 350 per session. Requests to swap duties must reach the COE Examination Section by 15 November 2026.
+
+- slug: all-staff-leave-policy-2026
+  title: Staff Leave Policy
+  doc_type: policy
+  college_code: all
+  audience: staff
+  category: general
+  issue_date: 2026-04-01
+  reference_no: NU/HR/POL/2026/01
+  body: |
+    # Staff Leave Policy
+
+    ## Entitlement
+    Permanent staff are entitled to 30 days of earned leave and 8 days of casual leave in each calendar year.
+
+    ## Encashment
+    Earned leave may be encashed up to 15 days in a year. Casual leave cannot be carried forward or encashed.
+
+    ## Applying
+    Leave is applied for through the staff portal at least 3 working days in advance, except in emergencies.
+
+- slug: cas-staff-meeting-oct-2026
+  title: CAS Staff Meeting - October 2026
+  doc_type: circular
+  college_code: cas
+  audience: staff
+  category: general
+  issue_date: 2026-09-28
+  expires_on: 2026-10-08
+  body: |
+    # CAS Staff Meeting - October 2026
+
+    A meeting of all CAS teaching staff will be held on 7 October 2026 at 15:00 in the CAS Seminar Hall. The agenda is the odd-semester examination plan and NAAC documentation.
+
+- slug: com-staff-appraisal-2026
+  title: COM Staff Self-Appraisal 2026
+  doc_type: circular
+  college_code: com
+  audience: staff
+  category: general
+  issue_date: 2026-09-20
+  body: |
+    # COM Staff Self-Appraisal 2026
+
+    All COM staff must submit their self-appraisal forms for 2025-26 through the staff portal by 31 October 2026.
+
+- slug: all-staff-da-revision-2026
+  title: Revision of Dearness Allowance
+  doc_type: circular
+  college_code: all
+  audience: staff
+  category: general
+  issue_date: 2026-09-10
+  reference_no: NU/HR/2026/14
+  body: |
+    # Revision of Dearness Allowance
+
+    The dearness allowance for all permanent staff is raised to 53 percent of basic pay with effect from 1 July 2026. Arrears will be paid with the October 2026 salary.
+
+- slug: all-ganesh-holiday-2026
+  title: Holiday for Ganesh Chaturthi
+  doc_type: circular
+  college_code: all
+  audience: public
+  category: general
+  issue_date: 2026-08-20
+  expires_on: 2026-08-28
+  body: |
+    # Holiday for Ganesh Chaturthi
+
+    The campus will remain closed on 27 August 2026 on account of Ganesh Chaturthi. Classes will resume on 28 August 2026.
+
+- slug: all-diwali-vacation-2026
+  title: Diwali Vacation 2026
+  doc_type: circular
+  college_code: all
+  audience: public
+  category: general
+  issue_date: 2026-09-22
+  expires_on: 2026-11-04
+  body: |
+    # Diwali Vacation 2026
+
+    The Diwali vacation for all colleges is from 19 October 2026 to 3 November 2026. Classes resume on 4 November 2026. Hostels remain open during the vacation.
+
+- slug: coe-ai-workshop-2026
+  title: Open Workshop on Applied AI
+  doc_type: circular
+  college_code: coe
+  audience: public
+  category: general
+  issue_date: 2026-09-24
+  expires_on: 2026-10-25
+  body: |
+    # Open Workshop on Applied AI
+
+    The Navrang College of Engineering is holding a one-day workshop on applied AI on 24 October 2026 in the COE Main Hall. The workshop is free and open to students of all colleges and to the public. Registration closes on 20 October 2026.
+
+- slug: all-scholarship-2026
+  title: Merit-cum-Means Scholarship 2026-27
+  doc_type: circular
+  college_code: all
+  audience: student
+  category: fee
+  issue_date: 2026-09-05
+  reference_no: NU/SCH/2026/02
+  body: |
+    # Merit-cum-Means Scholarship 2026-27
+
+    Students with at least 60 percent marks in the previous year and an annual family income below Rs 8 lakh may apply for the university merit-cum-means scholarship. The scholarship covers 50 percent of tuition fees. Applications are made on the student portal by 30 November 2026.
+
+- slug: all-hostel-guest-rules-hi
+  title: छात्रावास अतिथि नियम
+  doc_type: policy
+  college_code: all
+  audience: public
+  category: hostel
+  language: hi
+  issue_date: 2026-07-10
+  body: |
+    # छात्रावास अतिथि नियम
+
+    छात्रावास में अतिथियों को केवल रविवार को सुबह 10 बजे से शाम 5 बजे तक आने की अनुमति है। हर अतिथि को प्रवेश द्वार पर अपना पहचान पत्र दिखाना होगा और रजिस्टर में नाम दर्ज करना होगा। अतिथि रात में छात्रावास में नहीं रुक सकते।
+
+- slug: all-sports-week-mr
+  title: क्रीडा सप्ताह 2026
+  doc_type: circular
+  college_code: all
+  audience: public
+  category: general
+  language: mr
+  issue_date: 2026-09-26
+  expires_on: 2026-11-16
+  body: |
+    # क्रीडा सप्ताह 2026
+
+    विद्यापीठाचा क्रीडा सप्ताह 10 ते 15 नोव्हेंबर 2026 दरम्यान होणार आहे. सहभागी होण्यासाठी विद्यार्थ्यांनी 25 ऑक्टोबर 2026 पर्यंत क्रीडा विभागात नोंदणी करावी. क्रिकेट, कबड्डी, खो-खो आणि बुद्धिबळ स्पर्धा होतील.
+
+- slug: cas-exam-form-hi
+  title: परीक्षा फॉर्म भरने की अंतिम तिथि
+  doc_type: circular
+  college_code: cas
+  audience: student
+  category: exam
+  language: hi
+  issue_date: 2026-09-20
+  expires_on: 2026-10-21
+  body: |
+    # परीक्षा फॉर्म भरने की अंतिम तिथि
+
+    कला और विज्ञान महाविद्यालय के सभी छात्रों को विषम सत्र की परीक्षा का फॉर्म 15 अक्टूबर 2026 तक स्टूडेंट पोर्टल पर भरना है। 200 रुपये विलंब शुल्क के साथ फॉर्म 20 अक्टूबर 2026 तक भरा जा सकता है।
+
+- slug: com-fee-instalments-mr
+  title: शुल्क हप्त्यांमध्ये भरण्याची सुविधा
+  doc_type: circular
+  college_code: com
+  audience: student
+  category: fee
+  language: mr
+  issue_date: 2026-08-01
+  body: |
+    # शुल्क हप्त्यांमध्ये भरण्याची सुविधा
+
+    वाणिज्य व व्यवस्थापन महाविद्यालयातील विद्यार्थी सत्राचे शुल्क दोन हप्त्यांमध्ये भरू शकतात. पहिला हप्ता शुल्क परिपत्रकातील अंतिम तारखेपर्यंत आणि दुसरा हप्ता 15 जानेवारी 2027 पर्यंत भरावा. हप्त्यांसाठी लेखा विभागात अर्ज करावा.
+
+- slug: all-placement-tcs-2026
+  title: Campus Drive - TCS
+  doc_type: placement_notice
+  college_code: all
+  audience: student
+  category: placement
+  issue_date: 2026-09-28
+  expires_on: 2026-10-21
+  body: |
+    # Campus Drive - TCS
+
+    TCS will hold a campus recruitment drive on 20 October 2026. Final-year students of all programmes with a minimum CGPA of 6.0 and no active backlogs are eligible. Register on the placement portal by 12 October 2026.
+
+- slug: all-placement-infosys-2026
+  title: Campus Drive - Infosys
+  doc_type: placement_notice
+  college_code: all
+  audience: public
+  category: placement
+  issue_date: 2026-09-30
+  expires_on: 2026-11-07
+  body: |
+    # Campus Drive - Infosys
+
+    Infosys will recruit final-year students on 6 November 2026. The minimum CGPA is 6.5. The drive is open to final-year B.Tech, B.Sc. and BBA students. Registration is through the placement portal.
+
+- slug: all-placement-policy
+  title: Placement Policy
+  doc_type: policy
+  college_code: all
+  audience: student
+  category: placement
+  issue_date: 2026-06-01
+  body: |
+    # Placement Policy
+
+    ## One-offer rule
+    A student who has accepted one job offer through the Training and Placement Cell may not apply to further companies, with one exception.
+
+    ## Dream company exception
+    A student holding an offer may apply once more, only to a dream company. A dream company is one offering a CTC of Rs 10 lakh per year or more.
+
+- slug: coe-internship-fair-2026
+  title: COE Internship Fair 2026
+  doc_type: placement_notice
+  college_code: coe
+  audience: student
+  category: placement
+  issue_date: 2026-09-27
+  expires_on: 2026-10-15
+  body: |
+    # COE Internship Fair 2026
+
+    The COE internship fair will be held on 14 October 2026 in the COE Main Hall from 10:00 to 16:00. Second- and third-year B.Tech students should bring printed copies of their resume.
+
+- slug: all-bonafide-faq
+  title: Bonafide Certificate - FAQ
+  doc_type: faq
+  college_code: all
+  audience: public
+  category: general
+  issue_date: 2026-06-01
+  body: |
+    # Bonafide Certificate - FAQ
+
+    ## How do I get a bonafide certificate?
+    Logged-in students can request one through this helpdesk or at the Student Helpdesk counter. State the purpose, such as a bank account, passport or scholarship.
+
+    ## How long does it take?
+    Bonafide certificates are ready in 3 working days and are collected from the college office.
+
+- slug: all-transport-faq
+  title: Campus Transport - FAQ
+  doc_type: faq
+  college_code: all
+  audience: public
+  category: general
+  issue_date: 2026-06-01
+  body: |
+    # Campus Transport - FAQ
+
+    ## How much is the bus pass?
+    The annual bus pass costs Rs 9,000 and is valid on all university bus routes.
+
+    ## When do the buses run?
+    Buses reach the campus by 08:30 and leave the campus at 17:30 on working days.
+
+- slug: all-anti-ragging-policy
+  title: Anti-Ragging Policy
+  doc_type: policy
+  college_code: all
+  audience: public
+  category: general
+  issue_date: 2026-06-01
+  body: |
+    # Anti-Ragging Policy
+
+    Ragging in any form is banned on campus and in hostels. Complaints can be made to the anti-ragging helpline 1800-555-0199, which is available 24 hours, or to any member of the Anti-Ragging Committee.
+
+- slug: cas-library-extended-hours
+  title: CAS Library - Extended Hours Before Examinations
+  doc_type: circular
+  college_code: cas
+  audience: student
+  category: exam
+  issue_date: 2026-09-29
+  expires_on: 2026-12-16
+  body: |
+    # CAS Library - Extended Hours Before Examinations
+
+    The CAS reading room will stay open until 23:00 from 15 November 2026 to 15 December 2026 to help students prepare for the end-semester examinations.

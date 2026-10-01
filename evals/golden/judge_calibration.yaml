@@ -1,0 +1,23 @@
+# Hand-labelled claims for checking the faithfulness judge (docs/spec.md section 12.5).
+# Half are supported, half are not; several unsupported ones are deliberately close calls.
+
+- { label: supported, claim: "The revaluation fee is Rs 500 per paper.", source: "The revaluation fee is Rs 500 per paper. Revaluation results are declared within 30 days." }
+- { label: not_supported, claim: "The revaluation fee is Rs 300 per paper.", source: "The revaluation fee is Rs 500 per paper. Revaluation results are declared within 30 days." }
+- { label: supported, claim: "Hostel gates close at 22:00.", source: "Hostel gates close at 22:00 for all residents. Late entry requires prior written permission from the warden." }
+- { label: not_supported, claim: "Late entry to the hostel is never allowed.", source: "Hostel gates close at 22:00 for all residents. Late entry requires prior written permission from the warden." }
+- { label: supported, claim: "The semester 3 fee is due by 15 November 2026.", source: "The last date to pay the semester 3 fee is extended to 15 November 2026." }
+- { label: not_supported, claim: "The semester 3 fee is due by 31 October 2026.", source: "The last date to pay the semester 3 fee is extended to 15 November 2026." }
+- { label: supported, claim: "A late fee of Rs 100 per day is charged, up to Rs 2,000.", source: "A late fee of Rs 100 per day is charged after the due date, up to a maximum of Rs 2,000." }
+- { label: not_supported, claim: "The late fee has no upper limit.", source: "A late fee of Rs 100 per day is charged after the due date, up to a maximum of Rs 2,000." }
+- { label: supported, claim: "Students need 75 percent attendance to sit the exam.", source: "A student must have at least 75 percent attendance in each course to sit the end-semester examination in that course." }
+- { label: not_supported, claim: "Condonation is granted down to 50 percent attendance.", source: "Students below 75 percent may apply to the Principal for condonation on medical grounds; condonation is never granted below 65 percent." }
+- { label: supported, claim: "The bus pass costs Rs 9,000 a year.", source: "The annual bus pass costs Rs 9,000 and is valid on all university bus routes." }
+- { label: not_supported, claim: "The bus pass is free for hostel residents.", source: "The annual bus pass costs Rs 9,000 and is valid on all university bus routes." }
+- { label: supported, claim: "Applications open on 1 December 2026.", source: "Applications for admission to the 2027-28 academic year open on 1 December 2026 and close on 31 March 2027." }
+- { label: not_supported, claim: "Applications close on 31 January 2027.", source: "Applications for admission to the 2027-28 academic year open on 1 December 2026 and close on 31 March 2027." }
+- { label: supported, claim: "छात्रावास में अतिथि केवल रविवार को आ सकते हैं।", source: "छात्रावास में अतिथियों को केवल रविवार को सुबह 10 बजे से शाम 5 बजे तक आने की अनुमति है।" }
+- { label: not_supported, claim: "अतिथि रात में छात्रावास में रुक सकते हैं।", source: "अतिथि रात में छात्रावास में नहीं रुक सकते।" }
+- { label: supported, claim: "The Infosys drive needs a minimum CGPA of 6.5.", source: "Infosys will recruit final-year students on 6 November 2026. The minimum CGPA is 6.5." }
+- { label: not_supported, claim: "The Infosys drive is open to second-year students.", source: "The drive is open to final-year B.Tech, B.Sc. and BBA students." }
+- { label: supported, claim: "Bonafide certificates are ready in 3 working days.", source: "Bonafide certificates are ready in 3 working days and are collected from the college office." }
+- { label: not_supported, claim: "Bonafide certificates are sent by email.", source: "Bonafide certificates are ready in 3 working days and are collected from the college office." }

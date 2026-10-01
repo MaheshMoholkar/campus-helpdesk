@@ -1,0 +1,36 @@
+# Invented records for the mock student API. All demo passwords are "password".
+
+users:
+  - { id: S1001, kind: student, name: Aarav Kulkarni, college: coe, program: BTECH-CSE, year: 2, section: A, password: password }
+  - { id: S1002, kind: student, name: Meera Joshi, college: cas, program: BSC-PHY, year: 1, section: A, password: password }
+  - { id: S1003, kind: student, name: Kabir Shaikh, college: com, program: BCOM, year: 3, section: B, password: password }
+  - { id: S1004, kind: student, name: Ananya Patil, college: coe, program: BTECH-MECH, year: 3, section: A, password: password }
+  - { id: T2001, kind: staff, name: Dr. Rohan Deshmukh, college: coe, password: password }
+  - { id: T2002, kind: staff, name: Prof. Sneha Iyer, college: cas, password: password }
+  - { id: T2003, kind: staff, name: Prof. Imran Khan, college: com, password: password }
+
+fee_dues:
+  - { student_id: S1001, term: "2026-27 Semester 3", amount_due: 64500, due_date: 2026-11-15, status: due }
+  - { student_id: S1002, term: "2026-27 Semester 1", amount_due: 38000, due_date: 2026-11-10, status: due }
+  - { student_id: S1003, term: "2026-27 Semester 5", amount_due: 0, due_date: 2026-11-12, status: paid }
+  - { student_id: S1004, term: "2026-27 Semester 5", amount_due: 2500, due_date: 2026-11-15, status: due }
+
+attendance:
+  - { student_id: S1001, course_code: CS201, attended: 34, total: 40, as_of: 2026-09-30 }
+  - { student_id: S1001, course_code: CS203, attended: 27, total: 38, as_of: 2026-09-30 }
+  - { student_id: S1001, course_code: MA201, attended: 36, total: 40, as_of: 2026-09-30 }
+  - { student_id: S1002, course_code: PH101, attended: 30, total: 32, as_of: 2026-09-30 }
+  - { student_id: S1002, course_code: MA101, attended: 22, total: 32, as_of: 2026-09-30 }
+  - { student_id: S1003, course_code: CM301, attended: 40, total: 42, as_of: 2026-09-30 }
+  - { student_id: S1004, course_code: ME301, attended: 28, total: 40, as_of: 2026-09-30 }
+
+timetable:
+  - { college: coe, program: BTECH-CSE, year: 2, section: A, day: Monday, slot: "09:00-10:00", course_code: CS201, room: C-204 }
+  - { college: coe, program: BTECH-CSE, year: 2, section: A, day: Monday, slot: "10:00-11:00", course_code: MA201, room: C-204 }
+  - { college: coe, program: BTECH-CSE, year: 2, section: A, day: Tuesday, slot: "11:00-13:00", course_code: CS203, room: Lab-3 }
+  - { college: coe, program: BTECH-CSE, year: 2, section: A, day: Wednesday, slot: "09:00-10:00", course_code: CS201, room: C-204 }
+  - { college: coe, program: BTECH-CSE, year: 2, section: A, day: Friday, slot: "14:00-15:00", course_code: MA201, room: C-110 }
+  - { college: cas, program: BSC-PHY, year: 1, section: A, day: Monday, slot: "10:00-11:00", course_code: PH101, room: S-12 }
+  - { college: cas, program: BSC-PHY, year: 1, section: A, day: Thursday, slot: "12:00-13:00", course_code: MA101, room: S-08 }
+  - { college: com, program: BCOM, year: 3, section: B, day: Tuesday, slot: "09:00-10:00", course_code: CM301, room: M-21 }
+  - { college: coe, program: BTECH-MECH, year: 3, section: A, day: Wednesday, slot: "11:00-12:00", course_code: ME301, room: W-02 }

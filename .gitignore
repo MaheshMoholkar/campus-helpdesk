@@ -1,0 +1,26 @@
+# secrets and generated env
+.env
+.env.*
+!.env.example
+
+# login-token signing keys (generated on first run)
+apps/student_api/keys/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# node
+node_modules/
+apps/web/dist/
+
+# eval run output
+evals/runs/
+
+# tools
+.code-review-graph/
+.DS_Store
+.playwright-mcp/

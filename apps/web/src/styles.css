@@ -1,0 +1,78 @@
+/* WhatsApp-style chat. Every class is prefixed chd- so the page build cannot clash with
+   anything; the widget build also sits in a shadow root, so host-page CSS cannot reach it. */
+
+.chd-root {
+  --chd-green: #075e54;
+  --chd-teal: #128c7e;
+  --chd-mine: #dcf8c6;
+  --chd-bg: #ece5dd;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Devanagari", sans-serif;
+  font-size: 15px;
+  color: #111;
+  background: var(--chd-bg);
+}
+
+.chd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--chd-green);
+  color: #fff;
+}
+.chd-title { font-weight: 600; }
+.chd-subtitle { font-size: 12px; opacity: 0.85; }
+.chd-login { max-width: 55%; padding: 4px; border-radius: 6px; border: 0; }
+.chd-link { background: none; border: 1px solid #ffffff88; color: #fff; border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+.chd-error { background: #fdecea; color: #8a1c13; padding: 6px 14px; font-size: 13px; }
+
+.chd-messages { flex: 1; overflow-y: auto; padding: 12px; }
+.chd-empty { text-align: center; color: #555; padding: 24px 8px; }
+.chd-chip {
+  display: block; margin: 6px auto; padding: 6px 12px; border-radius: 16px;
+  border: 1px solid var(--chd-teal); background: #fff; color: var(--chd-green); cursor: pointer;
+}
+
+.chd-row { display: flex; margin: 4px 0; }
+.chd-user { justify-content: flex-end; }
+.chd-bubble {
+  max-width: 82%; padding: 8px 10px; border-radius: 8px; background: #fff;
+  box-shadow: 0 1px 1px #0002; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.chd-user .chd-bubble { background: var(--chd-mine); border-top-right-radius: 0; }
+.chd-assistant .chd-bubble { border-top-left-radius: 0; }
+.chd-typing { color: #888; font-style: italic; }
+
+.chd-sources { margin: 6px 0 0; padding: 6px 0 0 20px; border-top: 1px solid #eee; font-size: 12px; color: #444; }
+.chd-date { color: #888; }
+.chd-confirm {
+  margin-top: 8px; padding: 6px 14px; border: 0; border-radius: 16px;
+  background: var(--chd-teal); color: #fff; cursor: pointer;
+}
+.chd-feedback { display: flex; justify-content: flex-end; gap: 4px; margin-top: 4px; }
+.chd-feedback button { background: none; border: 0; cursor: pointer; opacity: 0.4; font-size: 14px; }
+.chd-feedback button:hover, .chd-feedback .chd-on { opacity: 1; }
+
+.chd-input { display: flex; gap: 8px; padding: 8px; background: #f0f0f0; }
+.chd-input input { flex: 1; padding: 10px 14px; border-radius: 20px; border: 0; font: inherit; }
+.chd-input button {
+  width: 42px; height: 42px; border-radius: 50%; border: 0;
+  background: var(--chd-teal); color: #fff; cursor: pointer; font-size: 16px;
+}
+.chd-input button:disabled { opacity: 0.5; cursor: default; }
+
+/* Widget: floating "assist" button and panel. */
+.chd-launcher {
+  position: fixed; right: 20px; bottom: 20px; z-index: 2147483000;
+  width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer;
+  background: #128c7e; color: #fff; font-size: 24px; box-shadow: 0 4px 12px #0004;
+}
+.chd-panel {
+  position: fixed; right: 20px; bottom: 88px; z-index: 2147483000;
+  width: min(380px, calc(100vw - 40px)); height: min(600px, calc(100vh - 120px));
+  border-radius: 12px; overflow: hidden; box-shadow: 0 8px 28px #0005;
+}

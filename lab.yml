@@ -1,0 +1,4 @@
+# Homelab services for this project. `lab up` writes .env.lab (never committed).
+project: helpdesk
+services:
+  postgres: { extensions: [vector] }
