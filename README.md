@@ -1,8 +1,8 @@
 # Campus Helpdesk
 
-**Ask your college anything, from inside [CampusERP](https://github.com/MaheshMoholkar/campus-erp).** Students and staff open the Assist panel and ask in English, Hindi, Marathi or Hinglish. Answers come from the college's own circulars, policies and FAQs, with the source and its issue date. "What's my fee due?" or "What's my leave balance?" is looked up live in CampusERP, and "I need a bonafide certificate" files the request once you confirm.
+An AI helpdesk for [CampusERP](https://github.com/MaheshMoholkar/campus-erp). Students and staff ask questions from CampusERP's Assist panel, in English, Hindi, Marathi or Hinglish. It answers from the college's circulars, policies and FAQs, and cites each source with its issue date. It can also look up the user's own fees, attendance, results and leave in CampusERP, and file a bonafide certificate request after the user confirms.
 
-When the notices don't cover a question, it says so, gives the right office's contact, and logs the question for the college to answer. Everything runs locally, including the LLM.
+If the notices don't cover a question, it says so and gives the right office's contact. Everything runs locally, including the LLM.
 
 [![CI](https://github.com/MaheshMoholkar/campus-helpdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/MaheshMoholkar/campus-helpdesk/actions/workflows/ci.yml)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Python_3.13-009688)
