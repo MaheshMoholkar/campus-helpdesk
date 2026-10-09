@@ -4,7 +4,7 @@ Status: reworked 2026-10-01 as an extension of CampusERP. Code built and tested 
 
 ## 1. What it is
 
-An AI helpdesk that extends [CampusERP](https://github.com/MaheshMoholkar/campus-erp), my multi-college ERP (Next.js 16 web app, FastAPI/Python API, PostgreSQL with row-level security per college). It answers college questions from circulars, policies, placement notices and FAQs with citations, and looks up a logged-in user's own CampusERP records (fees, attendance, results, leave) through CampusERP's API. It is a separate service in its own repository, built in levels, each one demoable and measured; it is also my project for learning applied AI.
+An AI helpdesk that extends [CampusERP](https://github.com/MaheshMoholkar/campus-erp), my multi-college ERP (Next.js and FastAPI). It answers college questions from circulars, policies, placement notices and FAQs with citations, and looks up a logged-in user's own CampusERP records (fees, attendance, results, leave) through CampusERP's API. It is a separate service in its own repository, built in levels, each one demoable and measured; it is also my project for learning applied AI.
 
 ## 2. Who uses it
 
@@ -56,7 +56,7 @@ The helpdesk API (port 8100 in development):
 - **Inside CampusERP:** CampusERP's web app forwards `/api/helpdesk/*` to the helpdesk with the browser's cookies, and shows an "Assist" chat panel to logged-in users. The browser only ever talks to CampusERP's own origin.
 - **Identity:** the helpdesk calls CampusERP's `GET /api/v1/auth/me` with the user's `__Host-session` cookie. CampusERP's response gives the user, the institute code and whether the login is linked to a student or a staff member.
 - **CSRF:** a `POST /chat` that carries a CampusERP session must also carry `X-CSRF-Token` equal to the `__Host-csrf` cookie (CampusERP's double-submit rule), checked by the helpdesk.
-- **Tools:** the helpdesk calls CampusERP's self-service endpoints (`fees/my-account`, `teaching/my-attendance`, `exams/my-results`, `hr/my-leave`, `people/my-bonafide-requests`) with the same session, so CampusERP's own permission checks and row-level security decide what comes back.
+- **Tools:** the helpdesk calls CampusERP's self-service endpoints (`fees/my-account`, `teaching/my-attendance`, `exams/my-results`, `hr/my-leave`, `people/my-bonafide-requests`) with the same session, so CampusERP's own access rules decide what comes back.
 - **Public widget:** the same React chat component, built as a script-tag widget for a college's public website. It is anonymous; the only backend concern it adds is a CORS allowlist.
 - **No shared database.** The helpdesk keeps its own Postgres (documents, chunks, conversations, metrics) and never reads CampusERP's tables.
 
@@ -234,7 +234,7 @@ How it is made hard to get wrong:
 - The helpdesk picks out only CampusERP's two cookies and calls CampusERP's `GET /api/v1/auth/me` with the session. The answer becomes the user's claims: `sub` = `<institute code>:<user id>`, role (student if the login is linked to a student, otherwise staff), college (institute code), and whether the login is linked to a student or staff member. It is fetched on every chat request, not cached: CampusERP may rotate a session on its next request (after a role or grant change), so the helpdesk lets that happen on `/auth/me`, uses the new token for the rest of the turn, and passes CampusERP's `Set-Cookie` back on the `/chat` response so the browser keeps its session.
 - No session cookie means anonymous. A session CampusERP rejects is a `401`, never anonymous. CampusERP unreachable is a `503`.
 - Every `POST` that carries a session must pass CampusERP's double-submit rule: `X-CSRF-Token` equal to the `__Host-csrf` cookie. Otherwise another site could make a logged-in browser chat, or confirm an action, on the user's behalf.
-- Tools call CampusERP with the same session (and, for `POST`, the CSRF cookie and header), so CampusERP's own permission checks and row-level security apply to every lookup.
+- Tools call CampusERP with the same session (and, for `POST`, the CSRF cookie and header), so CampusERP's own access rules apply to every lookup.
 
 ### 10.6 AI stack
 

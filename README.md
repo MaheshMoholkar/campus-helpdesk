@@ -1,6 +1,6 @@
 # Campus Helpdesk
 
-An AI helpdesk that extends **[CampusERP](https://github.com/MaheshMoholkar/campus-erp)**, my multi-college ERP (Next.js 16 web app, FastAPI/Python API, PostgreSQL with row-level security per college).
+An AI helpdesk that extends **[CampusERP](https://github.com/MaheshMoholkar/campus-erp)**, my multi-college ERP (Next.js and FastAPI).
 
 Students and staff ask questions from an "Assist" panel inside CampusERP. The helpdesk answers from the college's circulars, policies, placement notices and FAQs, with citations. It also reads the user's own CampusERP records (fees, attendance, results, leave) through CampusERP's API, and requests a bonafide certificate in CampusERP once the student confirms.
 
@@ -16,7 +16,7 @@ browser ──► CampusERP web app (Next.js) ──/api/helpdesk/*──► Cam
                                  (called with the user's own session)
 ```
 
-- **Users, colleges and records come from CampusERP.** The helpdesk has no logins of its own: it forwards the user's CampusERP session to `GET /auth/me` to find out who is asking. CampusERP's permission checks and row-level security then decide what every lookup returns.
+- **Users, colleges and records come from CampusERP.** The helpdesk has no logins of its own: it forwards the user's CampusERP session to `GET /auth/me` to find out who is asking. CampusERP's own access rules then decide what every lookup returns.
 - **Its own service, its own database.** The helpdesk is a separate FastAPI service with its own Postgres (documents, embeddings, conversations, metrics), so LLM and pgvector dependencies stay out of CampusERP.
 - **CampusERP side:** a few changes, made in that repo: `/api/helpdesk/*` forwarding, the Assist panel, a bonafide-request endpoint, and `institute.code` and `person` added to `/auth/me`.
 

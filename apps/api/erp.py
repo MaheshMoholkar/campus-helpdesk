@@ -4,9 +4,9 @@ The helpdesk has no users of its own. The browser talks to CampusERP's web app,
 which forwards /api/helpdesk/* here together with the user's CampusERP session
 cookie. To learn who is asking, the helpdesk calls CampusERP's GET /auth/me with
 that same session; to look up someone's fees or attendance it calls CampusERP's
-self-service endpoints, again as that user. So CampusERP's own permission checks
-and row-level security apply to every lookup: the helpdesk can never see more
-than the user could see in CampusERP itself.
+self-service endpoints, again as that user. So CampusERP's own access rules apply
+to every lookup: the helpdesk can never see more than the user could see in
+CampusERP itself.
 """
 
 import json
