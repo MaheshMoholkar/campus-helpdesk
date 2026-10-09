@@ -1,10 +1,12 @@
 // Embeddable build: one <script> tag adds a floating "assist" button to any page.
 //
 //   <script src="campus-helpdesk-widget.js"
-//           data-api-url="https://helpdesk.example/api"
-//           data-student-api-url="https://erp.example"></script>
+//           data-api-url="https://helpdesk.example/api"></script>
 //
-// or, for full control:  CampusHelpdesk.mount(element, { apiUrl, studentApiUrl })
+// or, for full control:  CampusHelpdesk.mount(element, { apiUrl })
+//
+// Anonymous by design: it is for a college's public website. Logged-in users use the
+// Assist panel inside CampusERP.
 
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -47,7 +49,6 @@ if (script?.dataset.apiUrl) {
   document.body.appendChild(host);
   mount(host, {
     apiUrl: script.dataset.apiUrl,
-    studentApiUrl: script.dataset.studentApiUrl ?? script.dataset.apiUrl,
     title: script.dataset.title,
   });
 }

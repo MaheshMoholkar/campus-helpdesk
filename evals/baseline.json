@@ -1,20 +1,20 @@
 {
   "fast:fake": {
-    "mrr": 0.861,
+    "mrr": 0.858,
     "no_stale_docs": 1.0,
-    "recall_at_5": 0.885,
+    "recall_at_5": 0.882,
     "recall_candidates": 1.0
   },
   "slow:fake": {
     "abstain_recall": 0.1,
-    "citation_valid": 0.883,
+    "citation_valid": 0.882,
     "fact_match": 0.702,
     "faithfulness": 1.0,
     "language_match": 1.0,
-    "mrr": 0.851,
+    "mrr": 0.848,
     "no_stale_docs": 1.0,
-    "outcome_ok": 0.831,
-    "recall_at_5": 0.885,
+    "outcome_ok": 0.833,
+    "recall_at_5": 0.882,
     "recall_candidates": 1.0,
     "tools_ok": 1.0
   }

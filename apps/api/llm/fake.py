@@ -119,7 +119,7 @@ class FakeLLM:
         if "bonafide" in text:
             return "action"
         if re.search(r"\b(my|mera|meri|mere|majha|majhi|maza|mazi)\b", text) and re.search(
-            r"fee|attendance|timetable|time table|class|hajeri|upasthiti", text
+            r"fee|attendance|result|sgpa|marks|leave|hajeri|upasthiti", text
         ):
             return "personal"
         if re.search(r"weather|cricket|movie|recipe|stock price|bitcoin", text):
@@ -146,11 +146,15 @@ class FakeLLM:
         if "bonafide" in text:
             wanted = ToolCall("call_1", "request_bonafide", {"purpose": "as requested by the student"})
         elif "fee" in text:
-            wanted = ToolCall("call_1", "get_fee_due", {})
+            wanted = ToolCall("call_1", "get_my_fees", {})
         elif "attendance" in text:
-            wanted = ToolCall("call_1", "get_attendance", {})
-        elif "timetable" in text or "class" in text:
-            wanted = ToolCall("call_1", "get_timetable", {})
+            wanted = ToolCall("call_1", "get_my_attendance", {})
+        elif "result" in text or "sgpa" in text or "marks" in text:
+            wanted = ToolCall("call_1", "get_my_results", {})
+        elif "leave" in text:
+            wanted = ToolCall("call_1", "get_my_leave", {})
         if wanted and wanted.name in available:
             return ChatResult("", [wanted])
-        return ChatResult("I can help with your fee dues, attendance, timetable or a bonafide request.")
+        return ChatResult(
+            "I can look up your fees, attendance, results, leave balance, or request a bonafide certificate."
+        )

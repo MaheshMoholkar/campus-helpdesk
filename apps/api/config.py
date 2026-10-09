@@ -32,16 +32,13 @@ class Settings(BaseSettings):
     # conversation
     history_turns: int = 6
 
-    # auth
-    student_api_url: str = "http://localhost:8001"
-    jwt_issuer: str = "campus-student-api"
-    jwt_audience: str = "campus-helpdesk"
+    # CampusERP, the system this helpdesk extends (its FastAPI API, not the web app)
+    erp_api_url: str = "http://localhost:8000"
+    erp_session_cookie: str = "__Host-session"
+    erp_csrf_cookie: str = "__Host-csrf"
+    erp_csrf_header: str = "X-CSRF-Token"
 
     ingest_api_key: str = "change-me"
     cors_origins: list[str] = ["http://localhost:5173"]
 
     otel_exporter_otlp_endpoint: str = ""
-
-    @property
-    def jwks_url(self) -> str:
-        return f"{self.student_api_url.rstrip('/')}/.well-known/jwks.json"

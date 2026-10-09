@@ -18,28 +18,30 @@ _TEXT: dict[str, dict[str, str]] = {
         "Please {office} se contact karein{contact}.",
     },
     "out_of_scope": {
-        "en": "I can only help with questions about Navrang University: fees, exams, hostels, "
-        "admissions, placements and your own records.",
-        "hi": "मैं केवल नवरंग विश्वविद्यालय से जुड़े प्रश्नों में मदद कर सकता हूँ: शुल्क, परीक्षा, छात्रावास, "
-        "प्रवेश, प्लेसमेंट और आपके अपने रिकॉर्ड।",
-        "mr": "मी फक्त नवरंग विद्यापीठाशी संबंधित प्रश्नांसाठी मदत करू शकतो: शुल्क, परीक्षा, वसतिगृह, "
-        "प्रवेश, प्लेसमेंट आणि तुमचे स्वतःचे रेकॉर्ड.",
-        "hinglish": "Main sirf Navrang University se jude sawaalon mein madad kar sakta hoon: fees, exams, "
-        "hostel, admission, placement aur aapke apne records.",
+        "en": "I can only help with questions about your college: fees, exams, hostels, admissions, "
+        "placements, and your own CampusERP records.",
+        "hi": "मैं केवल आपके कॉलेज से जुड़े प्रश्नों में मदद कर सकता हूँ: शुल्क, परीक्षा, छात्रावास, प्रवेश, "
+        "प्लेसमेंट और CampusERP में आपके अपने रिकॉर्ड।",
+        "mr": "मी फक्त तुमच्या महाविद्यालयाशी संबंधित प्रश्नांसाठी मदत करू शकतो: शुल्क, परीक्षा, वसतिगृह, "
+        "प्रवेश, प्लेसमेंट आणि CampusERP मधील तुमचे स्वतःचे रेकॉर्ड.",
+        "hinglish": "Main sirf aapke college se jude sawaalon mein madad kar sakta hoon: fees, exams, hostel, "
+        "admission, placement aur CampusERP mein aapke apne records.",
     },
     "login_required": {
-        "en": "Please log in as a student so I can look up your own records.",
-        "hi": "अपने रिकॉर्ड देखने के लिए कृपया छात्र के रूप में लॉग इन करें।",
-        "mr": "तुमचे रेकॉर्ड पाहण्यासाठी कृपया विद्यार्थी म्हणून लॉग इन करा.",
-        "hinglish": "Apne records dekhne ke liye please student login karein.",
+        "en": "Please log in to CampusERP so I can look up your own records.",
+        "hi": "अपने रिकॉर्ड देखने के लिए कृपया CampusERP में लॉग इन करें।",
+        "mr": "तुमचे रेकॉर्ड पाहण्यासाठी कृपया CampusERP मध्ये लॉग इन करा.",
+        "hinglish": "Apne records dekhne ke liye please CampusERP mein login karein.",
     },
     "students_only": {
-        "en": "Personal records (fee dues, attendance, timetable, bonafide requests) are available "
-        "for student accounts only.",
-        "hi": "व्यक्तिगत रिकॉर्ड (शुल्क, उपस्थिति, समय-सारणी, बोनाफाइड) केवल छात्र खातों के लिए उपलब्ध हैं।",
-        "mr": "वैयक्तिक रेकॉर्ड (शुल्क, उपस्थिती, वेळापत्रक, बोनाफाईड) फक्त विद्यार्थी खात्यांसाठी उपलब्ध आहेत.",
-        "hinglish": "Personal records (fee dues, attendance, timetable, bonafide) sirf student accounts ke "
-        "liye available hain.",
+        "en": "Your login is not linked to a student or staff record in CampusERP, so I have no personal "
+        "records to look up.",
+        "hi": "आपका लॉगिन CampusERP में किसी छात्र या कर्मचारी रिकॉर्ड से जुड़ा नहीं है, इसलिए देखने के लिए कोई "
+        "व्यक्तिगत रिकॉर्ड नहीं है।",
+        "mr": "तुमचे लॉगिन CampusERP मधील कोणत्याही विद्यार्थी किंवा कर्मचारी रेकॉर्डशी जोडलेले नाही, त्यामुळे "
+        "पाहण्यासाठी वैयक्तिक रेकॉर्ड नाहीत.",
+        "hinglish": "Aapka login CampusERP mein kisi student ya staff record se linked nahi hai, isliye "
+        "dekhne ke liye koi personal records nahi hain.",
     },
     "confirm_bonafide": {
         "en": "I can submit a bonafide certificate request for you (purpose: {purpose}). "
@@ -61,6 +63,12 @@ _TEXT: dict[str, dict[str, str]] = {
         "hi": "यह अनुरोध अब पुष्टि के लिए लंबित नहीं है। कृपया फिर से पूछें।",
         "mr": "ही विनंती आता पुष्टीसाठी प्रलंबित नाही. कृपया पुन्हा विचारा.",
         "hinglish": "Yeh request ab confirmation ke liye pending nahi hai. Please dobara poochein.",
+    },
+    "action_failed": {
+        "en": "CampusERP did not accept the request, so nothing was submitted. Please ask the college office.",
+        "hi": "CampusERP ने अनुरोध स्वीकार नहीं किया, इसलिए कुछ भी जमा नहीं हुआ। कृपया कॉलेज कार्यालय से संपर्क करें।",
+        "mr": "CampusERP ने विनंती स्वीकारली नाही, त्यामुळे काहीही सादर झाले नाही. कृपया महाविद्यालय कार्यालयाशी संपर्क साधा.",
+        "hinglish": "CampusERP ne request accept nahi ki, isliye kuch submit nahi hua. Please college office se contact karein.",
     },
     "records_unavailable": {
         "en": "I could not reach the student records system just now. Please try again in a while.",

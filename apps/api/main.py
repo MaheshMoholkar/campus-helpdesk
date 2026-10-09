@@ -1,10 +1,12 @@
 """Chat API: /ingest, /chat, /feedback, /health (docs/spec.md section 5).
 
-Run from the repository root:
-    uv run uvicorn apps.api.main:app --reload --port 8000
+Runs beside CampusERP, whose web app forwards /api/helpdesk/* here. From the repository root:
+    uv run uvicorn apps.api.main:app --reload --port 8100
 """
 
+import asyncio
 import json
+import secrets
 import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated
@@ -16,15 +18,21 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from apps.api import telemetry
-from apps.api.auth import InvalidToken, TokenVerifier
 from apps.api.chat import ChatRequest, ChatService, ChatSettings, ConversationNotFound
 from apps.api.config import Settings
 from apps.api.db import make_pool, run_migrations
+from apps.api.erp import (
+    ErpClient,
+    ErpUnavailable,
+    Identity,
+    NotLoggedIn,
+    credentials_from_cookie_header,
+)
 from apps.api.ingest import DocumentIn, UnknownCollege, ingest_document
 from apps.api.llm import Models, build_models
 from apps.api.retrieval import RetrievalConfig
-from apps.api.scope import Claims
-from apps.api.tools.student_records import StudentRecords
+
+PING_SECONDS = 15.0
 
 
 class Services:
@@ -34,21 +42,22 @@ class Services:
         self,
         settings: Settings,
         models: Models | None = None,
-        verifier: TokenVerifier | None = None,
-        records: StudentRecords | None = None,
+        erp: ErpClient | None = None,
     ):
         self.settings = settings
         run_migrations(settings.database_url)
         self.pool = make_pool(settings.database_url)
         self.models = models or build_models(settings)
-        self.verifier = verifier or TokenVerifier(
-            settings.jwt_issuer, settings.jwt_audience, jwks_url=settings.jwks_url
+        self.erp = erp or ErpClient(
+            settings.erp_api_url,
+            settings.erp_session_cookie,
+            settings.erp_csrf_cookie,
+            settings.erp_csrf_header,
         )
-        self.records = records or StudentRecords(settings.student_api_url)
         self.chat = ChatService(
             self.pool,
             self.models,
-            self.records,
+            self.erp,
             ChatSettings(
                 retrieval=RetrievalConfig(
                     settings.retrieval_mode, settings.candidates_k, settings.final_k, settings.as_of_date
@@ -75,32 +84,45 @@ def create_app(services_factory=None) -> FastAPI:
         services.close()
 
     app = FastAPI(title="Campus Helpdesk", version="0.1.0", lifespan=lifespan)
-    # The widget is embedded on other sites, so browsers need permission to call
-    # this API from those origins. Only listed origins get it.
+    # Inside CampusERP the browser calls this API on CampusERP's own origin (its web app
+    # forwards /api/helpdesk/*), so CORS is not involved. CORS is only for the public
+    # widget on other sites, which is anonymous and sends no cookies.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_methods=["GET", "POST"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_headers=["Content-Type"],
     )
 
     def services(request: Request) -> Services:
         return request.app.state.services
 
-    def claims(
-        svc: Annotated[Services, Depends(services)],
-        authorization: Annotated[str | None, Header()] = None,
-    ) -> tuple[Claims | None, str | None]:
-        """No Authorization header means anonymous; a bad token is an error, not anonymous."""
-        if not authorization:
-            return None, None
-        scheme, _, token = authorization.partition(" ")
-        if scheme.lower() != "bearer" or not token:
-            raise HTTPException(401, "expected 'Authorization: Bearer <token>'")
+    def claims(request: Request, svc: Annotated[Services, Depends(services)]) -> Identity | None:
+        """Who is asking, according to CampusERP.
+
+        No CampusERP session cookie means anonymous. A session that CampusERP rejects is
+        an error, not anonymous. Because the session is a cookie, every POST that carries
+        one must also pass CampusERP's double-submit CSRF check: the X-CSRF-Token header
+        must echo the CSRF cookie, so another site cannot make the browser chat (or
+        confirm an action) on the user's behalf.
+        """
+        settings = svc.settings
+        creds = credentials_from_cookie_header(
+            request.headers.get("cookie"), settings.erp_session_cookie, settings.erp_csrf_cookie
+        )
+        if creds is None:
+            return None
+        if request.method == "POST":
+            sent = request.headers.get(settings.erp_csrf_header)
+            if not creds.csrf or not sent or not secrets.compare_digest(sent, creds.csrf):
+                raise HTTPException(403, "CSRF token missing or does not match")
         try:
-            return svc.verifier.verify(token), token
-        except InvalidToken as exc:
-            raise HTTPException(401, f"invalid token: {exc}") from exc
+            identity = svc.erp.whoami(creds)
+        except NotLoggedIn as exc:
+            raise HTTPException(401, "CampusERP session is not valid; please log in again") from exc
+        except ErpUnavailable as exc:
+            raise HTTPException(503, "CampusERP is unavailable") from exc
+        return identity
 
     @app.get("/health")
     def health(svc: Annotated[Services, Depends(services)]):
@@ -132,13 +154,12 @@ def create_app(services_factory=None) -> FastAPI:
     async def chat(
         body: ChatIn,
         svc: Annotated[Services, Depends(services)],
-        auth: Annotated[tuple[Claims | None, str | None], Depends(claims)],
+        identity: Annotated[Identity | None, Depends(claims)],
     ):
-        user_claims, token = auth
         request = ChatRequest(
             question=body.question,
-            claims=user_claims,
-            token=token,
+            claims=identity.claims if identity else None,
+            creds=identity.creds if identity else None,
             conversation_id=str(body.conversation_id) if body.conversation_id else None,
             pending_action_id=str(body.pending_action_id) if body.pending_action_id else None,
         )
@@ -147,20 +168,55 @@ def create_app(services_factory=None) -> FastAPI:
         except ConversationNotFound as exc:
             raise HTTPException(404, "conversation not found") from exc
 
-        def sse():
+        async def sse():
             # Server-Sent Events: "event: <type>" and "data: <json>" lines, blank line between events.
-            try:
-                for kind, data in events:
-                    yield f"event: {kind}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
-            except Exception:
-                yield 'event: error\ndata: {"message": "internal error"}\n\n'
-                raise
+            # The chat flow is blocking (database, models), so it runs in a worker thread and hands
+            # events over through a queue. While nothing arrives, a ": ping" comment goes out every
+            # PING_SECONDS: CampusERP's Next.js proxy drops a connection after 30 s of silence, and a
+            # small local model can think that long before its first token.
+            loop = asyncio.get_running_loop()
+            queue: asyncio.Queue = asyncio.Queue()
+            done = object()
 
-        return StreamingResponse(
+            def produce():
+                try:
+                    for item in events:
+                        loop.call_soon_threadsafe(queue.put_nowait, item)
+                except Exception as exc:  # surfaced to the client as an error event
+                    loop.call_soon_threadsafe(queue.put_nowait, exc)
+                finally:
+                    loop.call_soon_threadsafe(queue.put_nowait, done)
+
+            worker = loop.run_in_executor(None, produce)
+            try:
+                while True:
+                    try:
+                        item = await asyncio.wait_for(queue.get(), timeout=PING_SECONDS)
+                    except TimeoutError:
+                        yield ": ping\n\n"
+                        continue
+                    if item is done:
+                        break
+                    if isinstance(item, Exception):
+                        yield 'event: error\ndata: {"message": "internal error"}\n\n'
+                        break
+                    kind, data = item
+                    yield f"event: {kind}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+            finally:
+                await worker
+
+        response = StreamingResponse(
             sse(),
             media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            # no-transform stops CampusERP's Next.js proxy from gzipping the stream, which would
+            # hold every event back until the answer is complete.
+            headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
         )
+        # A session CampusERP rotated during /auth/me goes back to the browser through
+        # CampusERP's proxy, or the browser would be signed out 30 s later.
+        for value in identity.set_cookie if identity else []:
+            response.headers.append("set-cookie", value)
+        return response
 
     class FeedbackIn(BaseModel):
         turn_id: uuid.UUID

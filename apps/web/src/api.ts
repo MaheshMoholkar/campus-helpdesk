@@ -1,4 +1,4 @@
-// Talking to the chat API and the mock student API.
+// Talking to the helpdesk API (anonymous; no cookies are sent cross-origin).
 
 export type Citation = { n: number; slug: string; title: string; issue_date: string };
 
@@ -9,12 +9,8 @@ export type ChatEvent =
   | { type: "done"; outcome: string; turn_id: string; pending_action_id?: string }
   | { type: "error"; message: string };
 
-export type User = { id: string; name: string; role: string; college: string };
-export type Session = { token: string; user: User };
-
 export type ChatOptions = {
   question: string;
-  token?: string;
   conversationId?: string;
   pendingActionId?: string;
   signal?: AbortSignal;
@@ -26,7 +22,6 @@ export async function* streamChat(apiUrl: string, options: ChatOptions): AsyncGe
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
     },
     body: JSON.stringify({
       question: options.question,
@@ -61,17 +56,6 @@ export async function* streamChat(apiUrl: string, options: ChatOptions): AsyncGe
       if (data) yield { type, ...JSON.parse(data) } as ChatEvent;
     }
   }
-}
-
-export async function login(studentApiUrl: string, username: string, password: string): Promise<Session> {
-  const response = await fetch(`${studentApiUrl}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-  if (!response.ok) throw new Error("Wrong username or password");
-  const body = await response.json();
-  return { token: body.access_token, user: body.user };
 }
 
 export async function sendFeedback(apiUrl: string, turnId: string, rating: 1 | -1): Promise<void> {

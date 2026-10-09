@@ -22,12 +22,12 @@ from psycopg_pool import ConnectionPool
 
 from apps.api import messages, prompts, telemetry
 from apps.api.conversation import classify_intent, detect_language, rewrite_question
+from apps.api.erp import ErpClient, ErpCredentials, ErpUnavailable, NotLoggedIn
 from apps.api.llm import Models
 from apps.api.llm.base import Usage
 from apps.api.retrieval import RetrievalConfig, RetrievalResult, retrieve
 from apps.api.scope import Claims, Scope, build_scope
 from apps.api.tools.loop import run_tool_loop
-from apps.api.tools.student_records import RecordsUnavailable, StudentRecords
 
 PENDING_ACTION_TTL = timedelta(minutes=10)
 _CITATION = re.compile(r"\[(\d+)\]")
@@ -41,7 +41,7 @@ class ConversationNotFound(Exception):
 class ChatRequest:
     question: str
     claims: Claims | None = None
-    token: str | None = None  # forwarded to the student API by the tools
+    creds: ErpCredentials | None = None  # the user's CampusERP session, forwarded by the tools
     conversation_id: str | None = None
     pending_action_id: str | None = None
 
@@ -59,12 +59,10 @@ Event = tuple[str, dict]
 
 
 class ChatService:
-    def __init__(
-        self, pool: ConnectionPool, models: Models, records: StudentRecords, settings: ChatSettings
-    ) -> None:
+    def __init__(self, pool: ConnectionPool, models: Models, erp: ErpClient, settings: ChatSettings) -> None:
         self._pool = pool
         self._models = models
-        self._records = records
+        self._erp = erp
         self._settings = settings
 
     def start(self, request: ChatRequest) -> Iterator[Event]:
@@ -324,13 +322,13 @@ class ChatService:
         started,
         root,
     ):
-        if scope.role == "anonymous" or not request.token:
+        if scope.role == "anonymous" or request.creds is None:
             reply = messages.text("login_required", language)
             yield from self._fixed_reply(
                 conn, conversation_id, turn_id, reply, "refused", usage, started, root
             )
             return
-        if scope.role != "student":
+        if request.claims.person_kind not in ("student", "staff"):
             reply = messages.text("students_only", language)
             yield from self._fixed_reply(
                 conn, conversation_id, turn_id, reply, "refused", usage, started, root
@@ -339,8 +337,16 @@ class ChatService:
 
         span = telemetry.child_span(root, "tools", "AGENT")
         try:
-            result = run_tool_loop(self._models.llm, self._records, request.token, history, question, usage)
-        except RecordsUnavailable:
+            result = run_tool_loop(
+                self._models.llm,
+                self._erp,
+                request.creds,
+                request.claims.person_kind,
+                history,
+                question,
+                usage,
+            )
+        except (ErpUnavailable, NotLoggedIn):
             span.end()
             reply = messages.text("records_unavailable", language)
             yield from self._fixed_reply(conn, conversation_id, turn_id, reply, "tool", usage, started, root)
@@ -421,10 +427,15 @@ class ChatService:
             return
 
         try:
-            created = self._records.request_bonafide(request.token, action["arguments"]["purpose"])
-        except RecordsUnavailable:
+            created = self._erp.request_bonafide(request.creds, action["arguments"]["purpose"])
+        except (ErpUnavailable, NotLoggedIn):
             conn.rollback()
             reply = messages.text("records_unavailable", language)
+            yield from self._fixed_reply(conn, conversation_id, turn_id, reply, "tool", usage, started, root)
+            return
+        if not isinstance(created, dict) or "error" in created or "id" not in created:
+            conn.rollback()  # CampusERP said no (e.g. not linked to a student); nothing was submitted
+            reply = messages.text("action_failed", language)
             yield from self._fixed_reply(conn, conversation_id, turn_id, reply, "tool", usage, started, root)
             return
         conn.execute(
@@ -432,7 +443,7 @@ class ChatService:
             (action["id"],),
         )
         conn.commit()
-        reply = messages.text("action_done", language, reference=str(created["id"])[:8].upper())
+        reply = messages.text("action_done", language, reference=str(created["id"]))
         yield from self._fixed_reply(conn, conversation_id, turn_id, reply, "tool", usage, started, root)
 
     def _fixed_reply(self, conn, conversation_id, turn_id, reply, outcome, usage, started, root):

@@ -1,10 +1,9 @@
 # secrets and generated env
+.erp-sessions.json
 .env
 .env.*
 !.env.example
 
-# login-token signing keys (generated on first run)
-apps/student_api/keys/
 
 # python
 .venv/

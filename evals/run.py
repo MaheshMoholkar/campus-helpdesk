@@ -14,7 +14,6 @@ import json
 import re
 import statistics
 import sys
-import tempfile
 import time
 from datetime import date, datetime
 from pathlib import Path
@@ -26,10 +25,10 @@ from apps.api.chat import ChatRequest, ChatService, ChatSettings, collect
 from apps.api.cli import load_all
 from apps.api.config import Settings
 from apps.api.db import make_pool, run_migrations
+from apps.api.erp import ErpClient, ErpCredentials
 from apps.api.llm import build_models
 from apps.api.retrieval import RetrievalConfig, retrieve
 from apps.api.scope import Claims, build_scope
-from apps.api.tools.student_records import StudentRecords
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / "evals" / "golden" / "cases.yaml"
@@ -40,6 +39,7 @@ EXPERIMENTS = ROOT / "docs" / "experiments.md"
 DATA_TODAY = yaml.safe_load((ROOT / "data" / "plan.yaml").read_text())["today_for_data"]
 
 SLOW_ONLY = {"follow_up", "tool"}
+DEMO_PASSWORD = "campus-demo-password"  # CampusERP `make seed`
 CALIBRATION_GATE = 0.85
 _DEVANAGARI = re.compile(r"[ऀ-ॿ]")
 _CITATION = re.compile(r"\[(\d+)\]")
@@ -121,9 +121,10 @@ def faithfulness(llm, answer: str, sources: list[str]) -> float | None:
     return sum(supported) / len(supported)
 
 
-def run_chat_case(service: ChatService, pool, case, models, login) -> dict:
-    claims = claims_for(case)
+def run_chat_case(service: ChatService, pool, case, models, erp, login) -> dict:
+    # Cases with a "user" log in to CampusERP and are identified by it, exactly as in production.
     token = login(case["user"]) if case.get("user") else None
+    claims = erp.whoami(token).claims if token else claims_for(case)
     conversation_id = None
     for earlier in case.get("history", []):
         prior = collect(service.stream(ChatRequest(earlier, claims, token, conversation_id)))
@@ -337,6 +338,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--threshold", type=float, help="abstain threshold")
     parser.add_argument("--only", help="comma-separated case ids")
     parser.add_argument("--margin", type=float, default=0.05)
+    parser.add_argument("--erp-url", help="CampusERP API for cases that log in (default: ERP_API_URL)")
     parser.add_argument("--update-baseline", action="store_true")
     parser.add_argument("--log", metavar="CHANGE", help="append a row to docs/experiments.md")
     args = parser.parse_args(argv)
@@ -380,40 +382,21 @@ def main(argv: list[str] | None = None) -> int:
             with pool.connection() as conn:
                 rows = [run_retrieval_case(conn, case, models, config) for case in cases]
         else:
-            from fastapi.testclient import TestClient
-
-            from apps.student_api.main import Settings as StudentSettings
-            from apps.student_api.main import create_app as create_student_app
-
-            with (
-                tempfile.TemporaryDirectory() as keys,
-                TestClient(
-                    create_student_app(
-                        replace_settings(StudentSettings(), settings.database_url, Path(keys))
-                    ),
-                    base_url="http://student-api",
-                ) as student_api,
-            ):
-
-                def login(username: str) -> str:
-                    response = student_api.post("/login", json={"username": username, "password": "password"})
-                    response.raise_for_status()
-                    return response.json()["access_token"]
-
-                service = ChatService(
-                    pool,
-                    models,
-                    StudentRecords(client=student_api),
-                    ChatSettings(
-                        retrieval=config,
-                        abstain_threshold=settings.abstain_threshold,
-                        answer_max_tokens=settings.answer_max_tokens,
-                        include_retrieval_debug=True,
-                    ),
-                )
-                for number, case in enumerate(cases, start=1):
-                    rows.append(run_chat_case(service, pool, case, models, login))
-                    print(f"  [{number}/{len(cases)}] {case['id']} -> {rows[-1]['outcome']}", flush=True)
+            erp, login = campus_erp(args.erp_url or settings.erp_api_url)
+            service = ChatService(
+                pool,
+                models,
+                erp,
+                ChatSettings(
+                    retrieval=config,
+                    abstain_threshold=settings.abstain_threshold,
+                    answer_max_tokens=settings.answer_max_tokens,
+                    include_retrieval_debug=True,
+                ),
+            )
+            for number, case in enumerate(cases, start=1):
+                rows.append(run_chat_case(service, pool, case, models, erp, login))
+                print(f"  [{number}/{len(cases)}] {case['id']} -> {rows[-1]['outcome']}", flush=True)
             calibration = calibrate(models.llm)
     finally:
         pool.close()
@@ -448,10 +431,14 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if failures else 0
 
 
-def replace_settings(student_settings, database_url: str, keys_dir: Path):
-    return student_settings.model_copy(
-        update={"database_url": database_url, "student_api_keys_dir": keys_dir}
-    )
+def campus_erp(erp_url: str):
+    """The real CampusERP API, and a way to log its demo users in."""
+    erp = ErpClient(erp_url)
+
+    def login(email: str) -> ErpCredentials:
+        return erp.reusable_login(email, DEMO_PASSWORD, ROOT / ".erp-sessions.json")
+
+    return erp, login
 
 
 if __name__ == "__main__":

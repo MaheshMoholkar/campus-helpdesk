@@ -26,7 +26,6 @@
 }
 .chd-title { font-weight: 600; }
 .chd-subtitle { font-size: 12px; opacity: 0.85; }
-.chd-login { max-width: 55%; padding: 4px; border-radius: 6px; border: 0; }
 .chd-link { background: none; border: 1px solid #ffffff88; color: #fff; border-radius: 6px; padding: 4px 8px; cursor: pointer; }
 .chd-error { background: #fdecea; color: #8a1c13; padding: 6px 14px; font-size: 13px; }
 

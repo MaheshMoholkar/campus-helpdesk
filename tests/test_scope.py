@@ -6,7 +6,7 @@ import pytest
 
 from apps.api.scope import Claims, build_scope, is_visible
 
-COLLEGES = ("coe", "cas", "com")
+COLLEGES = ("alpha", "beta")
 AUDIENCES = ("public", "student", "staff")
 DOC_COLLEGES = (*COLLEGES, "all")
 
@@ -48,4 +48,4 @@ def test_logging_in_never_shows_less_than_anonymous():
 
 def test_unknown_role_is_rejected():
     with pytest.raises(ValueError):
-        build_scope(Claims("X", "admin", "coe"))
+        build_scope(Claims("X", "admin", "alpha"))

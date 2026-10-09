@@ -22,11 +22,13 @@ _RESTRICTED_BY_ROLE: dict[str, tuple[str, ...]] = {
 
 @dataclass(frozen=True)
 class Claims:
-    """What a verified login token says about the user."""
+    """Who CampusERP says the user is (apps/api/erp.py builds these from /auth/me)."""
 
-    sub: str
+    sub: str  # "<college>:<CampusERP user id>"
     role: str  # "student" | "staff"
-    college: str
+    college: str  # CampusERP institute code
+    name: str | None = None
+    person_kind: str | None = None  # "student" | "staff" | None (a login linked to neither)
 
 
 @dataclass(frozen=True)

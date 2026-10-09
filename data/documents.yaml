@@ -1,5 +1,6 @@
-# Invented documents for Navrang University, written from plan.yaml.
-# Nothing here describes a real institution.
+# Documents for CampusERP's two demo colleges (the ones `make seed` creates there):
+# alpha = Sahyadri Engineering College, beta = Deccan Science College. `all` = applies to both.
+# The content is invented; it describes no real institution.
 
 - slug: all-admissions-faq-2026
   title: Admissions FAQ 2027-28
@@ -12,7 +13,7 @@
     # Admissions FAQ 2027-28
 
     ## When do applications open?
-    Applications for admission to the 2027-28 academic year open on 1 December 2026 and close on 31 March 2027. Applications are accepted only through the university admissions portal.
+    Applications for admission to the 2027-28 academic year open on 1 December 2026 and close on 31 March 2027. Applications are accepted only through the admissions portal.
 
     ## What is the application fee?
     The application fee is Rs 800. Candidates from reserved categories pay Rs 400. The fee is not refundable.
@@ -21,7 +22,7 @@
     Undergraduate merit lists are prepared from the qualifying examination marks. Engineering admissions also use the state entrance test score, weighted at 50 percent.
 
     ## Can I apply to more than one college?
-    Yes. One application form lets a candidate list up to three colleges of Navrang University in order of preference.
+    Yes. One application form lets a candidate list both Sahyadri Engineering College and Deccan Science College in order of preference.
 
 - slug: all-campus-faq
   title: About the Campus - FAQ
@@ -33,8 +34,8 @@
   body: |
     # About the Campus
 
-    ## Which colleges are on campus?
-    Navrang University in Sahyadri Nagar has three colleges: the Navrang College of Engineering (COE), the Navrang College of Arts and Science (CAS) and the Navrang College of Commerce and Management (COM).
+    ## Which colleges use this helpdesk?
+    Sahyadri Engineering College (SEC) and Deccan Science College (DSC). Both run on CampusERP; each college's notices and records are kept separate.
 
     ## What are the central library timings?
     The central library is open from 08:00 to 22:00 on working days and from 09:00 to 17:00 on Sundays. It is closed on university holidays.
@@ -134,116 +135,89 @@
 
     This notice supersedes the hostel fee notice for 2025-26. The annual hostel fee for the academic year 2026-27 is Rs 58,000, including mess charges. The fee is payable in one instalment by 31 July 2026.
 
-- slug: coe-fee-structure-2026-v1
-  title: COE Fee Structure - Semester 3, 2026-27
+- slug: alpha-fee-structure-2026-v1
+  title: SEC Fee Structure - Semester 3, 2026-27
   doc_type: circular
-  college_code: coe
+  college_code: alpha
   audience: student
   category: fee
   issue_date: 2026-06-10
-  series_key: coe-fee-structure-2026
+  series_key: alpha-fee-structure-2026
   version: 1
-  reference_no: COE/ACC/2026/11
+  reference_no: SEC/ACC/2026/11
   body: |
-    # COE Fee Structure - Semester 3, 2026-27
+    # SEC Fee Structure - Semester 3, 2026-27
 
     The tuition fee for semester 3 of the B.Tech programme is Rs 62,000. The last date to pay the semester 3 fee is 31 October 2026. Pay through the student portal.
 
-- slug: coe-fee-structure-2026-v2
-  title: Revised COE Fee Structure - Semester 3, 2026-27
+- slug: alpha-fee-structure-2026-v2
+  title: Revised SEC Fee Structure - Semester 3, 2026-27
   doc_type: circular
-  college_code: coe
+  college_code: alpha
   audience: student
   category: fee
   issue_date: 2026-08-20
-  series_key: coe-fee-structure-2026
+  series_key: alpha-fee-structure-2026
   version: 2
-  reference_no: COE/ACC/2026/19
+  reference_no: SEC/ACC/2026/19
   body: |
-    # Revised COE Fee Structure - Semester 3, 2026-27
+    # Revised SEC Fee Structure - Semester 3, 2026-27
 
-    This circular supersedes circular COE/ACC/2026/11. Following the revision approved by the Governing Council, the tuition fee for semester 3 of the B.Tech programme is Rs 64,500. The last date to pay the semester 3 fee is extended to 15 November 2026. Students who have already paid Rs 62,000 must pay the difference of Rs 2,500 by the same date.
+    This circular supersedes circular SEC/ACC/2026/11. Following the revision approved by the Governing Council, the tuition fee for semester 3 of the B.Tech programme is Rs 64,500. The last date to pay the semester 3 fee is extended to 15 November 2026. Students who have already paid Rs 62,000 must pay the difference of Rs 2,500 by the same date.
 
-- slug: cas-fee-structure-2026
-  title: CAS Fee Circular - Odd Semester 2026-27
+- slug: beta-fee-structure-2026
+  title: DSC Fee Circular - Odd Semester 2026-27
   doc_type: circular
-  college_code: cas
+  college_code: beta
   audience: student
   category: fee
   issue_date: 2026-07-05
-  reference_no: CAS/ACC/2026/07
+  reference_no: DSC/ACC/2026/07
   body: |
-    # CAS Fee Circular - Odd Semester 2026-27
+    # DSC Fee Circular - Odd Semester 2026-27
 
-    The semester fee for all B.A. and B.Sc. programmes for the odd semester is Rs 38,000. The last date to pay the semester fee is 10 November 2026.
+    The semester fee for all B.Sc. programmes for the odd semester is Rs 38,000. The last date to pay the semester fee is 10 November 2026.
 
-- slug: com-fee-structure-2026
-  title: COM Fee Circular - Odd Semester 2026-27
+- slug: alpha-exam-schedule-odd-2026
+  title: SEC End-Semester Examination Schedule - Odd Semester 2026
   doc_type: circular
-  college_code: com
-  audience: student
-  category: fee
-  issue_date: 2026-07-05
-  reference_no: COM/ACC/2026/05
-  body: |
-    # COM Fee Circular - Odd Semester 2026-27
-
-    The semester fee for the B.Com and BBA programmes for the odd semester is Rs 42,000. The last date to pay the semester fee is 12 November 2026.
-
-- slug: coe-exam-schedule-odd-2026
-  title: COE End-Semester Examination Schedule - Odd Semester 2026
-  doc_type: circular
-  college_code: coe
+  college_code: alpha
   audience: student
   category: exam
   issue_date: 2026-09-15
   expires_on: 2026-12-31
-  reference_no: COE/EXAM/2026/08
+  reference_no: SEC/EXAM/2026/08
   body: |
-    # COE End-Semester Examination Schedule - Odd Semester 2026
+    # SEC End-Semester Examination Schedule - Odd Semester 2026
 
     End-semester examinations for all B.Tech years begin on 1 December 2026. Hall tickets will be available on the student portal from 20 November 2026. The detailed paper-wise timetable is attached on the portal.
 
-- slug: cas-exam-schedule-odd-2026
-  title: CAS End-Semester Examination Schedule - Odd Semester 2026
+- slug: beta-exam-schedule-odd-2026
+  title: DSC End-Semester Examination Schedule - Odd Semester 2026
   doc_type: circular
-  college_code: cas
+  college_code: beta
   audience: student
   category: exam
   issue_date: 2026-09-18
   expires_on: 2026-12-31
-  reference_no: CAS/EXAM/2026/06
+  reference_no: DSC/EXAM/2026/06
   body: |
-    # CAS End-Semester Examination Schedule - Odd Semester 2026
+    # DSC End-Semester Examination Schedule - Odd Semester 2026
 
-    End-semester examinations for B.A. and B.Sc. programmes begin on 5 December 2026. Hall tickets will be issued from 25 November 2026.
+    End-semester examinations for B.Sc. programmes begin on 5 December 2026. Hall tickets will be issued from 25 November 2026.
 
-- slug: com-exam-schedule-odd-2026
-  title: COM End-Semester Examination Schedule - Odd Semester 2026
+- slug: alpha-invigilation-duty-2026
+  title: Invigilation Duties - SEC Odd Semester Examinations 2026
   doc_type: circular
-  college_code: com
-  audience: student
-  category: exam
-  issue_date: 2026-09-18
-  expires_on: 2026-12-31
-  reference_no: COM/EXAM/2026/04
-  body: |
-    # COM End-Semester Examination Schedule - Odd Semester 2026
-
-    End-semester examinations for B.Com and BBA programmes begin on 3 December 2026. Hall tickets will be issued from 23 November 2026.
-
-- slug: coe-invigilation-duty-2026
-  title: Invigilation Duties - COE Odd Semester Examinations 2026
-  doc_type: circular
-  college_code: coe
+  college_code: alpha
   audience: staff
   category: exam
   issue_date: 2026-09-25
-  reference_no: COE/EXAM/STAFF/2026/02
+  reference_no: SEC/EXAM/STAFF/2026/02
   body: |
-    # Invigilation Duties - COE Odd Semester Examinations 2026
+    # Invigilation Duties - SEC Odd Semester Examinations 2026
 
-    All teaching staff of COE are assigned invigilation duties during the end-semester examinations. Invigilators must report to the examination control room 30 minutes before each session. The invigilation remuneration is Rs 350 per session. Requests to swap duties must reach the COE Examination Section by 15 November 2026.
+    All teaching staff of SEC are assigned invigilation duties during the end-semester examinations. Invigilators must report to the examination control room 30 minutes before each session. The invigilation remuneration is Rs 350 per session. Requests to swap duties must reach the SEC Examination Section by 15 November 2026.
 
 - slug: all-staff-leave-policy-2026
   title: Staff Leave Policy
@@ -265,30 +239,30 @@
     ## Applying
     Leave is applied for through the staff portal at least 3 working days in advance, except in emergencies.
 
-- slug: cas-staff-meeting-oct-2026
-  title: CAS Staff Meeting - October 2026
+- slug: beta-staff-meeting-oct-2026
+  title: DSC Staff Meeting - October 2026
   doc_type: circular
-  college_code: cas
+  college_code: beta
   audience: staff
   category: general
   issue_date: 2026-09-28
   expires_on: 2026-10-08
   body: |
-    # CAS Staff Meeting - October 2026
+    # DSC Staff Meeting - October 2026
 
-    A meeting of all CAS teaching staff will be held on 7 October 2026 at 15:00 in the CAS Seminar Hall. The agenda is the odd-semester examination plan and NAAC documentation.
+    A meeting of all DSC teaching staff will be held on 7 October 2026 at 15:00 in the DSC Seminar Hall. The agenda is the odd-semester examination plan and NAAC documentation.
 
-- slug: com-staff-appraisal-2026
-  title: COM Staff Self-Appraisal 2026
+- slug: beta-staff-appraisal-2026
+  title: DSC Staff Self-Appraisal 2026
   doc_type: circular
-  college_code: com
+  college_code: beta
   audience: staff
   category: general
   issue_date: 2026-09-20
   body: |
-    # COM Staff Self-Appraisal 2026
+    # DSC Staff Self-Appraisal 2026
 
-    All COM staff must submit their self-appraisal forms for 2025-26 through the staff portal by 31 October 2026.
+    All DSC staff must submit their self-appraisal forms for 2025-26 through the staff portal by 31 October 2026.
 
 - slug: all-staff-da-revision-2026
   title: Revision of Dearness Allowance
@@ -329,10 +303,10 @@
 
     The Diwali vacation for all colleges is from 19 October 2026 to 3 November 2026. Classes resume on 4 November 2026. Hostels remain open during the vacation.
 
-- slug: coe-ai-workshop-2026
+- slug: alpha-ai-workshop-2026
   title: Open Workshop on Applied AI
   doc_type: circular
-  college_code: coe
+  college_code: alpha
   audience: public
   category: general
   issue_date: 2026-09-24
@@ -340,7 +314,7 @@
   body: |
     # Open Workshop on Applied AI
 
-    The Navrang College of Engineering is holding a one-day workshop on applied AI on 24 October 2026 in the COE Main Hall. The workshop is free and open to students of all colleges and to the public. Registration closes on 20 October 2026.
+    The Sahyadri Engineering College is holding a one-day workshop on applied AI on 24 October 2026 in the SEC Main Hall. The workshop is free and open to students of all colleges and to the public. Registration closes on 20 October 2026.
 
 - slug: all-scholarship-2026
   title: Merit-cum-Means Scholarship 2026-27
@@ -382,10 +356,10 @@
 
     विद्यापीठाचा क्रीडा सप्ताह 10 ते 15 नोव्हेंबर 2026 दरम्यान होणार आहे. सहभागी होण्यासाठी विद्यार्थ्यांनी 25 ऑक्टोबर 2026 पर्यंत क्रीडा विभागात नोंदणी करावी. क्रिकेट, कबड्डी, खो-खो आणि बुद्धिबळ स्पर्धा होतील.
 
-- slug: cas-exam-form-hi
+- slug: beta-exam-form-hi
   title: परीक्षा फॉर्म भरने की अंतिम तिथि
   doc_type: circular
-  college_code: cas
+  college_code: beta
   audience: student
   category: exam
   language: hi
@@ -394,12 +368,12 @@
   body: |
     # परीक्षा फॉर्म भरने की अंतिम तिथि
 
-    कला और विज्ञान महाविद्यालय के सभी छात्रों को विषम सत्र की परीक्षा का फॉर्म 15 अक्टूबर 2026 तक स्टूडेंट पोर्टल पर भरना है। 200 रुपये विलंब शुल्क के साथ फॉर्म 20 अक्टूबर 2026 तक भरा जा सकता है।
+    डेक्कन विज्ञान महाविद्यालय के सभी छात्रों को विषम सत्र की परीक्षा का फॉर्म 15 अक्टूबर 2026 तक स्टूडेंट पोर्टल पर भरना है। 200 रुपये विलंब शुल्क के साथ फॉर्म 20 अक्टूबर 2026 तक भरा जा सकता है।
 
-- slug: com-fee-instalments-mr
+- slug: beta-fee-instalments-mr
   title: शुल्क हप्त्यांमध्ये भरण्याची सुविधा
   doc_type: circular
-  college_code: com
+  college_code: beta
   audience: student
   category: fee
   language: mr
@@ -407,7 +381,7 @@
   body: |
     # शुल्क हप्त्यांमध्ये भरण्याची सुविधा
 
-    वाणिज्य व व्यवस्थापन महाविद्यालयातील विद्यार्थी सत्राचे शुल्क दोन हप्त्यांमध्ये भरू शकतात. पहिला हप्ता शुल्क परिपत्रकातील अंतिम तारखेपर्यंत आणि दुसरा हप्ता 15 जानेवारी 2027 पर्यंत भरावा. हप्त्यांसाठी लेखा विभागात अर्ज करावा.
+    डेक्कन विज्ञान महाविद्यालयातील विद्यार्थी सत्राचे शुल्क दोन हप्त्यांमध्ये भरू शकतात. पहिला हप्ता शुल्क परिपत्रकातील अंतिम तारखेपर्यंत आणि दुसरा हप्ता 15 जानेवारी 2027 पर्यंत भरावा. हप्त्यांसाठी लेखा विभागात अर्ज करावा.
 
 - slug: all-placement-tcs-2026
   title: Campus Drive - TCS
@@ -451,18 +425,18 @@
     ## Dream company exception
     A student holding an offer may apply once more, only to a dream company. A dream company is one offering a CTC of Rs 10 lakh per year or more.
 
-- slug: coe-internship-fair-2026
-  title: COE Internship Fair 2026
+- slug: alpha-internship-fair-2026
+  title: SEC Internship Fair 2026
   doc_type: placement_notice
-  college_code: coe
+  college_code: alpha
   audience: student
   category: placement
   issue_date: 2026-09-27
   expires_on: 2026-10-15
   body: |
-    # COE Internship Fair 2026
+    # SEC Internship Fair 2026
 
-    The COE internship fair will be held on 14 October 2026 in the COE Main Hall from 10:00 to 16:00. Second- and third-year B.Tech students should bring printed copies of their resume.
+    The SEC internship fair will be held on 14 October 2026 in the SEC Main Hall from 10:00 to 16:00. Second- and third-year B.Tech students should bring printed copies of their resume.
 
 - slug: all-bonafide-faq
   title: Bonafide Certificate - FAQ
@@ -508,15 +482,15 @@
 
     Ragging in any form is banned on campus and in hostels. Complaints can be made to the anti-ragging helpline 1800-555-0199, which is available 24 hours, or to any member of the Anti-Ragging Committee.
 
-- slug: cas-library-extended-hours
-  title: CAS Library - Extended Hours Before Examinations
+- slug: beta-library-extended-hours
+  title: DSC Library - Extended Hours Before Examinations
   doc_type: circular
-  college_code: cas
+  college_code: beta
   audience: student
   category: exam
   issue_date: 2026-09-29
   expires_on: 2026-12-16
   body: |
-    # CAS Library - Extended Hours Before Examinations
+    # DSC Library - Extended Hours Before Examinations
 
-    The CAS reading room will stay open until 23:00 from 15 November 2026 to 15 December 2026 to help students prepare for the end-semester examinations.
+    The DSC reading room will stay open until 23:00 from 15 November 2026 to 15 December 2026 to help students prepare for the end-semester examinations.

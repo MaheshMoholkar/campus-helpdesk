@@ -1,37 +1,39 @@
-# The invented university, and the facts its documents must state.
-# Documents (documents.yaml) are written from this plan; golden-set expected facts
-# are copied from it. Everything here is fictional.
+# The colleges are CampusERP's demo institutes (`make seed` in the CampusERP repo):
+# their codes here must match CampusERP's institute codes. Documents (documents.yaml)
+# are written from the facts below; golden-set expected facts are copied from them.
+# The document content is invented.
 
-university: Navrang University
-city: Sahyadri Nagar
 today_for_data: 2026-10-01   # dates below are chosen relative to this day
 
 colleges:
-  - { code: coe, name: Navrang College of Engineering }
-  - { code: cas, name: Navrang College of Arts and Science }
-  - { code: com, name: Navrang College of Commerce and Management }
+  - { code: alpha, name: Sahyadri Engineering College }
+  - { code: beta, name: Deccan Science College }
 
 offices:
-  - { name: Examination Cell, college_code: all, category: exam,
-      email: exam.cell@navrang.example, phone: "+91 20 5550 1101", hours: "Mon-Sat 10:00-17:00" }
-  - { name: COE Examination Section, college_code: coe, category: exam,
-      email: coe.exams@navrang.example, phone: "+91 20 5550 1201", hours: "Mon-Fri 10:00-16:00" }
-  - { name: University Accounts Office, college_code: all, category: fee,
-      email: accounts@navrang.example, phone: "+91 20 5550 1102", hours: "Mon-Fri 10:00-16:00" }
-  - { name: COE Accounts Section, college_code: coe, category: fee,
-      email: coe.accounts@navrang.example, phone: "+91 20 5550 1202", hours: "Mon-Fri 10:00-15:00" }
-  - { name: CAS Accounts Section, college_code: cas, category: fee,
-      email: cas.accounts@navrang.example, phone: "+91 20 5550 1302", hours: "Mon-Fri 10:00-15:00" }
-  - { name: COM Accounts Section, college_code: com, category: fee,
-      email: com.accounts@navrang.example, phone: "+91 20 5550 1402", hours: "Mon-Fri 10:00-15:00" }
+  - { name: SEC Examination Section, college_code: alpha, category: exam,
+      email: exams@alpha.test, phone: "+91 20 5550 1201", hours: "Mon-Fri 10:00-16:00" }
+  - { name: SEC Accounts Office, college_code: alpha, category: fee,
+      email: accounts@alpha.test, phone: "+91 20 5550 1202", hours: "Mon-Fri 10:00-15:00" }
+  - { name: SEC Admissions Office, college_code: alpha, category: admission,
+      email: admissions@alpha.test, phone: "+91 20 5550 1204", hours: "Mon-Sat 09:30-17:30" }
+  - { name: SEC Office, college_code: alpha, category: general,
+      email: office@alpha.test, phone: "+91 20 5550 1200", hours: "Mon-Sat 09:00-18:00" }
+  - { name: DSC Examination Section, college_code: beta, category: exam,
+      email: exams@beta.test, phone: "+91 20 5550 1301", hours: "Mon-Fri 10:00-16:00" }
+  - { name: DSC Accounts Office, college_code: beta, category: fee,
+      email: accounts@beta.test, phone: "+91 20 5550 1302", hours: "Mon-Fri 10:00-15:00" }
+  - { name: DSC Admissions Office, college_code: beta, category: admission,
+      email: admissions@beta.test, phone: "+91 20 5550 1304", hours: "Mon-Sat 09:30-17:30" }
+  - { name: DSC Office, college_code: beta, category: general,
+      email: office@beta.test, phone: "+91 20 5550 1300", hours: "Mon-Sat 09:00-18:00" }
   - { name: Hostel Office, college_code: all, category: hostel,
-      email: hostel@navrang.example, phone: "+91 20 5550 1103", hours: "Daily 09:00-20:00" }
-  - { name: Admissions Office, college_code: all, category: admission,
-      email: admissions@navrang.example, phone: "+91 20 5550 1104", hours: "Mon-Sat 09:30-17:30" }
+      email: hostel@alpha.test, phone: "+91 20 5550 1103", hours: "Daily 09:00-20:00" }
   - { name: Training and Placement Cell, college_code: all, category: placement,
-      email: placements@navrang.example, phone: "+91 20 5550 1105", hours: "Mon-Fri 10:00-17:00" }
-  - { name: Student Helpdesk, college_code: all, category: general,
-      email: helpdesk@navrang.example, phone: "+91 20 5550 1100", hours: "Mon-Sat 09:00-18:00" }
+      email: placements@alpha.test, phone: "+91 20 5550 1105", hours: "Mon-Fri 10:00-17:00" }
+  - { name: Examination Cell, college_code: all, category: exam,
+      email: exams@alpha.test, phone: "+91 20 5550 1101", hours: "Mon-Sat 10:00-17:00" }
+  - { name: College Office, college_code: all, category: general,
+      email: office@alpha.test, phone: "+91 20 5550 1100", hours: "Mon-Sat 09:00-18:00" }
 
 # Key facts per document (slug -> facts). The golden set draws on these.
 facts:
@@ -40,7 +42,7 @@ facts:
     - The application fee is Rs 800 (Rs 400 for reserved categories).
   all-campus-faq:
     - The central library is open 08:00-22:00 on working days and 09:00-17:00 on Sundays.
-    - The campus has three colleges.
+    - Two colleges use the helpdesk - SEC (alpha) and DSC (beta).
   all-exam-policy-2026:
     - Minimum 75% attendance in each course is required to sit the end-semester exam.
     - Revaluation costs Rs 500 per paper and must be applied for within 7 days of results.
@@ -52,31 +54,29 @@ facts:
     - Mess timings - breakfast 07:30-09:00, lunch 12:30-14:00, dinner 19:30-21:00.
   hostel-fee-v1 / hostel-fee-v2:
     - v1 (2025-26) annual hostel fee Rs 55,000; v2 (2026-27) Rs 58,000, current.
-  coe-fee-structure v1 / v2:
+  alpha-fee-structure v1 / v2:
     - v1 semester 3 fee Rs 62,000 due 31 October 2026; v2 revised to Rs 64,500 due 15 November 2026, current.
-  cas-fee-structure-2026: [Semester fee Rs 38,000 due 10 November 2026.]
-  com-fee-structure-2026: [Semester fee Rs 42,000 due 12 November 2026.]
-  coe-exam-schedule-odd-2026: [Exams start 1 December 2026; hall tickets from 20 November 2026.]
-  cas-exam-schedule-odd-2026: [Exams start 5 December 2026.]
-  com-exam-schedule-odd-2026: [Exams start 3 December 2026.]
-  coe-invigilation-duty-2026: [Invigilators report 30 minutes early; Rs 350 per session.]
+  beta-fee-structure-2026: [Semester fee Rs 38,000 due 10 November 2026.]
+  alpha-exam-schedule-odd-2026: [Exams start 1 December 2026; hall tickets from 20 November 2026.]
+  beta-exam-schedule-odd-2026: [Exams start 5 December 2026.]
+  alpha-invigilation-duty-2026: [Invigilators report 30 minutes early; Rs 350 per session.]
   all-staff-leave-policy-2026: [30 days earned leave and 8 days casual leave a year; earned leave encashable up to 15 days a year.]
-  cas-staff-meeting-oct-2026: [Staff meeting on 7 October 2026 at 15:00 in the CAS Seminar Hall.]
-  com-staff-appraisal-2026: [Self-appraisal forms due 31 October 2026.]
+  beta-staff-meeting-oct-2026: [Staff meeting on 7 October 2026 at 15:00 in the DSC Seminar Hall.]
+  beta-staff-appraisal-2026: [Self-appraisal forms due 31 October 2026.]
   all-ganesh-holiday-2026: [Expired notice - campus closed 27 August 2026.]
   all-diwali-vacation-2026: [Diwali vacation 19 October to 3 November 2026; classes resume 4 November.]
-  coe-ai-workshop-2026: [Public AI workshop 24 October 2026, free, open to all colleges, register by 20 October.]
+  alpha-ai-workshop-2026: [Public AI workshop 24 October 2026, free, open to all colleges, register by 20 October.]
   all-scholarship-2026: [Merit-cum-means scholarship; family income under Rs 8 lakh; apply by 30 November 2026.]
   all-hostel-guest-rules-hi: [Guests allowed only on Sundays, 10:00-17:00, with ID - stated only in Hindi.]
   all-sports-week-mr: [Sports week 10-15 November 2026; register by 25 October - stated only in Marathi.]
-  cas-exam-form-hi: [CAS exam form last date 15 October 2026; with Rs 200 late fee until 20 October - Hindi.]
-  com-fee-instalments-mr: [COM fee in two instalments; second instalment by 15 January 2027 - Marathi.]
+  beta-exam-form-hi: [DSC exam form last date 15 October 2026; with Rs 200 late fee until 20 October - Hindi.]
+  beta-fee-instalments-mr: [DSC fee in two instalments; second instalment by 15 January 2027 - Marathi.]
   all-placement-tcs-2026: [TCS drive 20 October 2026; register by 12 October; minimum CGPA 6.0.]
   all-placement-infosys-2026: [Infosys drive 6 November 2026; minimum CGPA 6.5; open to final-year students.]
   all-placement-policy: [One-offer rule; a student with an offer may apply once more only to a dream company (CTC Rs 10 lakh or more).]
-  coe-internship-fair-2026: [COE internship fair 14 October 2026 in the COE Main Hall.]
+  alpha-internship-fair-2026: [SEC internship fair 14 October 2026 in the COE Main Hall.]
   all-bonafide-faq: [Bonafide certificates are ready in 3 working days.]
   all-transport-faq: [Bus pass Rs 9,000 a year; buses leave the campus at 17:30.]
   all-anti-ragging-policy: [Anti-ragging helpline 1800-555-0199, 24 hours.]
-  cas-library-extended-hours: [CAS library open until 23:00 from 15 November to 15 December 2026.]
+  beta-library-extended-hours: [DSC library open until 23:00 from 15 November to 15 December 2026.]
   all-staff-da-revision-2026: [Dearness allowance raised to 53% from 1 July 2026.]

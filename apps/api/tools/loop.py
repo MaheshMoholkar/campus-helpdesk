@@ -9,14 +9,9 @@ import json
 from dataclasses import dataclass, field
 
 from apps.api import prompts
+from apps.api.erp import ErpClient, ErpCredentials
 from apps.api.llm.base import LLMClient, Message, Usage
-from apps.api.tools.student_records import (
-    ACTION_TOOLS,
-    READ_TOOLS,
-    TOOL_DEFINITIONS,
-    StudentRecords,
-    run_read_tool,
-)
+from apps.api.tools.erp_tools import ACTION_TOOLS, run_read_tool, tools_for
 
 MAX_ROUNDS = 3
 
@@ -36,8 +31,9 @@ class ToolLoopResult:
 
 def run_tool_loop(
     llm: LLMClient,
-    records: StudentRecords,
-    token: str,
+    erp: ErpClient,
+    creds: ErpCredentials,
+    person_kind: str | None,
     history: list[dict],
     question: str,
     usage: Usage,
@@ -49,16 +45,18 @@ def run_tool_loop(
         )
     messages.append({"role": "user", "content": question})
 
+    definitions, read_tools = tools_for(person_kind)
+    offered = {d["function"]["name"] for d in definitions}
     called: list[str] = []
     for _ in range(MAX_ROUNDS):
-        result = llm.chat(messages, tools=TOOL_DEFINITIONS, max_tokens=400)
+        result = llm.chat(messages, tools=definitions, max_tokens=400)
         usage.add(result.usage)
         if not result.tool_calls:
             return ToolLoopResult(result.text.strip(), called)
 
         # An action ends the loop at once: nothing is executed until the user confirms.
         for call in result.tool_calls:
-            if call.name in ACTION_TOOLS:
+            if call.name in ACTION_TOOLS and call.name in offered:
                 purpose = str(call.arguments.get("purpose") or "general purpose")[:200]
                 called.append(call.name)
                 return ToolLoopResult("", called, ProposedAction(call.name, {"purpose": purpose}))
@@ -78,8 +76,8 @@ def run_tool_loop(
             }
         )
         for call in result.tool_calls:
-            if call.name in READ_TOOLS:
-                output = run_read_tool(records, token, call.name, call.arguments)
+            if call.name in read_tools:
+                output = run_read_tool(erp, creds, call.name, call.arguments)
                 called.append(call.name)
             else:
                 output = {"error": f"unknown tool {call.name}"}

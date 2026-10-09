@@ -6,10 +6,10 @@ each answer, so eval results can be tied to the prompt that produced them.
 
 from apps.api.llm.base import Message
 
-ANSWER_VERSION = "answer-v1"
+ANSWER_VERSION = "answer-v2"
 
 # First lines double as identifiers: the fake model in tests recognises a task by them.
-ANSWER_HEAD = "You are the Campus Helpdesk assistant for Navrang University."
+ANSWER_HEAD = "You are Campus Helpdesk, the assistant built into CampusERP for this college."
 REWRITE_HEAD = "Rewrite the user's latest message as one standalone question."
 INTENT_HEAD = "Classify the user's message into exactly one category."
 TOOLS_HEAD = "You are the Campus Helpdesk assistant helping a logged-in user with their own records."
@@ -33,10 +33,10 @@ stands alone, return it unchanged. Output only the question, nothing else."""
 
 INTENT_SYSTEM = f"""{INTENT_HEAD}
 
-- faq: asks about university rules, dates, fees, hostels, exams, admissions, placements.
-- personal: asks about the user's own records: "my fee due", "my attendance", "my timetable".
+- faq: asks about college rules, notices, dates, fees, hostels, exams, admissions, placements.
+- personal: asks about the user's own records: "my fee due", "my attendance", "my results", "my leave balance".
 - action: asks to get something done: requesting a bonafide certificate.
-- out_of_scope: anything unrelated to the university.
+- out_of_scope: anything unrelated to the college.
 
 Output one word: faq, personal, action, or out_of_scope."""
 
@@ -44,7 +44,8 @@ TOOLS_SYSTEM = f"""{TOOLS_HEAD}
 
 Rules:
 - Use the tools to look up the user's records. Never guess values.
-- The tools already know who the user is. Never ask for or accept a student id.
+- The tools already know who the user is (from their CampusERP login). Never ask for or accept an id.
+- Amounts are in rupees (INR).
 - Reply in the language of the user's message, in at most four sentences.
 - For a bonafide certificate, call request_bonafide; the user will be asked to confirm."""
 

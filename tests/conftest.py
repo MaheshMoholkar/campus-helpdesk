@@ -1,8 +1,9 @@
 """Shared fixtures.
 
 Database tests need the docker-compose Postgres (`docker compose up -d postgres`)
-or any Postgres with pgvector, given as TEST_DATABASE_URL. They use their own
-database and are skipped when none is reachable.
+or any Postgres with pgvector, given as TEST_DATABASE_URL. Tests that call CampusERP
+need its API running (ERP_TEST_URL, default http://localhost:8000) with demo data.
+Each group is skipped when its service is not reachable.
 """
 
 import os
@@ -11,22 +12,23 @@ from pathlib import Path
 
 import psycopg
 import pytest
-from fastapi.testclient import TestClient
 
-from apps.api.auth import TokenVerifier
 from apps.api.chat import ChatService, ChatSettings
 from apps.api.cli import load_all
 from apps.api.db import make_pool, run_migrations
+from apps.api.erp import ErpClient, ErpCredentials, credentials_from_cookie_header
 from apps.api.llm import Models
 from apps.api.llm.fake import FakeEmbedder, FakeLLM
 from apps.api.retrieval import RetrievalConfig
-from apps.api.tools.student_records import StudentRecords
 
 TEST_DATABASE_URL = os.environ.get(
     "TEST_DATABASE_URL", "postgresql://helpdesk:helpdesk@localhost:5433/helpdesk_test"
 )
 DATA_TODAY = date(2026, 10, 1)  # the day the invented data is written for (data/plan.yaml)
 ROOT = Path(__file__).resolve().parents[1]
+ERP_TEST_URL = os.environ.get("ERP_TEST_URL", "http://localhost:8000")
+DEMO_PASSWORD = "campus-demo-password"  # CampusERP `make seed`
+ERP_SESSIONS = ROOT / ".erp-sessions.json"  # demo sessions reused across runs (git-ignored)
 
 
 def _reachable() -> bool:
@@ -43,7 +45,6 @@ def database_url() -> str:
         pytest.skip(f"no test database at {TEST_DATABASE_URL}")
     with psycopg.connect(TEST_DATABASE_URL, autocommit=True) as conn:
         conn.execute("DROP SCHEMA IF EXISTS helpdesk CASCADE")
-        conn.execute("DROP SCHEMA IF EXISTS student_api CASCADE")
     run_migrations(TEST_DATABASE_URL)
     return TEST_DATABASE_URL
 
@@ -64,44 +65,44 @@ def loaded(pool):
 
 
 @pytest.fixture(scope="session")
-def student_api(database_url, tmp_path_factory):
-    from apps.student_api.main import Settings as StudentSettings
-    from apps.student_api.main import create_app as create_student_app
+def erp():
+    """The real CampusERP API (`make dev-api` in the CampusERP repo, after `make seed`).
 
-    settings = StudentSettings(
-        database_url=database_url,
-        student_api_keys_dir=tmp_path_factory.mktemp("keys"),
-        student_records_file=ROOT / "data" / "student_records.yaml",
-    )
-    with TestClient(create_student_app(settings), base_url="http://student-api") as client:
-        yield client
+    Tests that need it are skipped when it is not running.
+    """
+    import httpx
+
+    try:
+        httpx.get(f"{ERP_TEST_URL}/health/live", timeout=3).raise_for_status()
+    except httpx.HTTPError:
+        pytest.skip(f"no CampusERP API at {ERP_TEST_URL}")
+    return ErpClient(ERP_TEST_URL)
 
 
 @pytest.fixture(scope="session")
-def login(student_api):
-    tokens: dict[str, str] = {}
+def login(erp):
+    """Log in to CampusERP; returns the Cookie header CampusERP's web app would forward."""
+    cookies: dict[str, str] = {}
 
-    def _login(username: str) -> str:
-        if username not in tokens:
-            response = student_api.post("/login", json={"username": username, "password": "password"})
-            response.raise_for_status()
-            tokens[username] = response.json()["access_token"]
-        return tokens[username]
+    def _login(email: str) -> str:
+        if email not in cookies:
+            creds = erp.reusable_login(email, DEMO_PASSWORD, ERP_SESSIONS)
+            cookies[email] = f"{erp.session_cookie}={creds.session}; {erp.csrf_cookie}={creds.csrf}"
+        return cookies[email]
 
     return _login
 
 
 @pytest.fixture(scope="session")
-def verifier(student_api):
-    key = student_api.app.state.key
-    from cryptography.hazmat.primitives import serialization
+def creds(login, erp):
+    def _creds(email: str) -> ErpCredentials:
+        return credentials_from_cookie_header(login(email), erp.session_cookie, erp.csrf_cookie)
 
-    public_key = serialization.load_pem_private_key(key.private_pem, password=None).public_key()
-    return TokenVerifier("campus-student-api", "campus-helpdesk", key_for_token=lambda _token: public_key)
+    return _creds
 
 
 @pytest.fixture(scope="session")
-def chat_service(loaded, student_api):
+def chat_service(loaded, erp):
     models = Models(embedder=FakeEmbedder(), llm=FakeLLM(), reranker=None)
     settings = ChatSettings(retrieval=RetrievalConfig(today=DATA_TODAY), include_retrieval_debug=True)
-    return ChatService(loaded, models, StudentRecords(client=student_api), settings)
+    return ChatService(loaded, models, erp, settings)

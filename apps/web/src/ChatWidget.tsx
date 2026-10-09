@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { type Citation, type Session, login, sendFeedback, streamChat } from "./api";
+import { type Citation, sendFeedback, streamChat } from "./api";
 
 export type ChatWidgetProps = {
   apiUrl: string;
-  studentApiUrl: string;
   title?: string;
 };
 
@@ -19,26 +18,21 @@ type Message = {
   streaming?: boolean;
 };
 
-const DEMO_USERS = [
-  { id: "S1001", label: "Aarav (student, Engineering)" },
-  { id: "S1002", label: "Meera (student, Arts & Science)" },
-  { id: "S1003", label: "Kabir (student, Commerce)" },
-  { id: "T2001", label: "Dr. Deshmukh (staff, Engineering)" },
-];
-
-const SUGGESTIONS = ["What is the revaluation fee?", "hostel ka gate kitne baje band hota hai?", "What is my fee due?"];
+const SUGGESTIONS = ["What is the revaluation fee?", "hostel ka gate kitne baje band hota hai?", "When do 2027 admissions open?"];
 
 let nextId = 0;
 const newId = () => `m${++nextId}`;
 
-/** The one chat component: used full-page and, wrapped, as the embeddable widget. */
-export function ChatWidget({ apiUrl, studentApiUrl, title = "Campus Helpdesk" }: ChatWidgetProps) {
+/**
+ * The public chat: full page, or wrapped as the embeddable widget for a college's website.
+ * It is anonymous; logged-in users chat from the Assist panel inside CampusERP, which
+ * carries their CampusERP session.
+ */
+export function ChatWidget({ apiUrl, title = "Campus Helpdesk" }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
   const [conversationId, setConversationId] = useState<string>();
-  const [loginError, setLoginError] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,7 +57,6 @@ export function ChatWidget({ apiUrl, studentApiUrl, title = "Campus Helpdesk" }:
     try {
       for await (const event of streamChat(apiUrl, {
         question,
-        token: session?.token,
         conversationId,
         pendingActionId,
       })) {
@@ -82,23 +75,6 @@ export function ChatWidget({ apiUrl, studentApiUrl, title = "Campus Helpdesk" }:
     }
   }
 
-  async function signIn(username: string) {
-    setLoginError("");
-    try {
-      setSession(await login(studentApiUrl, username, "password"));
-      setConversationId(undefined); // a new identity starts a new conversation
-      setMessages([]);
-    } catch (error) {
-      setLoginError((error as Error).message);
-    }
-  }
-
-  function signOut() {
-    setSession(null);
-    setConversationId(undefined);
-    setMessages([]);
-  }
-
   async function rate(message: Message, rating: 1 | -1) {
     if (!message.turnId || message.rated) return;
     update(message.id, { rated: rating });
@@ -110,31 +86,9 @@ export function ChatWidget({ apiUrl, studentApiUrl, title = "Campus Helpdesk" }:
       <header className="chd-header">
         <div>
           <div className="chd-title">{title}</div>
-          <div className="chd-subtitle">
-            {session ? `${session.user.name} · ${session.user.role} · ${session.user.college.toUpperCase()}` : "Guest"}
-          </div>
+          <div className="chd-subtitle">Answers from your college's notices, with sources</div>
         </div>
-        {session ? (
-          <button className="chd-link" onClick={signOut}>
-            Log out
-          </button>
-        ) : (
-          <select
-            className="chd-login"
-            value=""
-            onChange={(e) => e.target.value && signIn(e.target.value)}
-            aria-label="Log in as a demo user"
-          >
-            <option value="">Log in as…</option>
-            {DEMO_USERS.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.label}
-              </option>
-            ))}
-          </select>
-        )}
       </header>
-      {loginError && <div className="chd-error">{loginError}</div>}
 
       <div className="chd-messages" ref={listRef}>
         {messages.length === 0 && (

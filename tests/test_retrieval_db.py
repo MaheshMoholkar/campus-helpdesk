@@ -12,8 +12,8 @@ from tests.conftest import DATA_TODAY, ROOT
 pytestmark = pytest.mark.db
 
 DOCS = {d["slug"]: d for d in yaml.safe_load((ROOT / "data" / "documents.yaml").read_text())}
-USERS = [None] + [Claims(f"{r}-{c}", r, c) for r in ("student", "staff") for c in ("coe", "cas", "com")]
-NOT_LIVE = {"coe-fee-structure-2026-v1", "hostel-fee-2025-26", "all-ganesh-holiday-2026"}
+USERS = [None] + [Claims(f"{r}-{c}", r, c) for r in ("student", "staff") for c in ("alpha", "beta")]
+NOT_LIVE = {"alpha-fee-structure-2026-v1", "hostel-fee-2025-26", "all-ganesh-holiday-2026"}
 
 
 @pytest.mark.parametrize("claims", USERS, ids=lambda c: "anonymous" if c is None else c.sub)
@@ -45,7 +45,7 @@ def test_no_search_returns_anything_outside_scope(loaded, claims):
 
 def test_restricted_documents_are_actually_reachable_by_their_audience(loaded):
     """The leak test above would pass trivially if nothing restricted were ever found."""
-    scope = build_scope(Claims("T2001", "staff", "coe"))
+    scope = build_scope(Claims("alpha:13", "staff", "alpha"))
     with loaded.connection() as conn:
         result = retrieve(
             conn,
@@ -55,22 +55,22 @@ def test_restricted_documents_are_actually_reachable_by_their_audience(loaded):
             None,
             RetrievalConfig(today=DATA_TODAY),
         )
-    assert "coe-invigilation-duty-2026" in result.stages["final"]
+    assert "alpha-invigilation-duty-2026" in result.stages["final"]
 
 
 def test_newest_version_wins(loaded):
-    scope = build_scope(Claims("S1001", "student", "coe"))
+    scope = build_scope(Claims("alpha:11", "student", "alpha"))
     with loaded.connection() as conn:
         result = retrieve(
             conn,
             scope,
-            "COE semester 3 fee last date",
+            "SEC semester 3 fee last date",
             FakeEmbedder(),
             None,
             RetrievalConfig(today=DATA_TODAY),
         )
-    assert "coe-fee-structure-2026-v2" in result.stages["final"]
-    assert "coe-fee-structure-2026-v1" not in result.stages["candidates"]
+    assert "alpha-fee-structure-2026-v2" in result.stages["final"]
+    assert "alpha-fee-structure-2026-v1" not in result.stages["candidates"]
 
 
 def test_expiry_depends_on_the_date(loaded):

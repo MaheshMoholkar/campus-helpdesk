@@ -1,27 +1,29 @@
 # Campus Helpdesk — Specification
 
-Status: spec complete 2026-10-01. Code for M0 to M7 built the same day and tested with stand-in models; the real-model path (Ollama on the mini) is not yet verified.
+Status: reworked 2026-10-01 as an extension of CampusERP. Code built and tested with stand-in models against CampusERP's real API (demo data); the real-model path (Ollama on the mini) is not yet verified.
 
 ## 1. What it is
 
-A standalone AI assistant that answers campus queries for an invented university with several colleges. It is a personal portfolio project for learning applied AI. Backend-first with a thin chat UI. Built in levels, each one demoable and measured.
+An AI helpdesk that extends [CampusERP](https://github.com/MaheshMoholkar/campus-erp), my multi-college ERP (Next.js 16 web app, FastAPI/Python API, PostgreSQL with row-level security per college). It answers college questions from circulars, policies, placement notices and FAQs with citations, and looks up a logged-in user's own CampusERP records (fees, attendance, results, leave) through CampusERP's API. It is a separate service in its own repository, built in levels, each one demoable and measured; it is also my project for learning applied AI.
 
 ## 2. Who uses it
 
-| Role | Can ask about | Documents visible |
-|------|---------------|-------------------|
-| Anonymous | General campus, admissions and placement questions | `public`, from every college |
-| Student (logged in) | The above, plus their own college's circulars and their own data | All `public`; `student` for their college and for `all` |
-| Staff (logged in) | The above, plus staff circulars | All `public`; `student` and `staff` for their college and for `all` |
+Users are CampusERP users. Colleges are CampusERP institutes (in development, the two `make seed` creates: `alpha` = Sahyadri Engineering College, `beta` = Deccan Science College). The helpdesk has no logins of its own: CampusERP's `/auth/me` says who someone is.
+
+| Role | How CampusERP identifies them | Can ask about | Documents visible |
+|------|-------------------------------|---------------|-------------------|
+| Anonymous | No CampusERP session (public widget on a college website) | General, admissions and placement questions | `public`, from every college |
+| Student | Login linked to a student | The above, plus their college's circulars and their own records | All `public`; `student` for their college and for `all` |
+| Staff | Any other college login (teachers, office staff, administrators) | The above, plus staff circulars; leave balance if linked to a staff member | All `public`; `student` and `staff` for their college and for `all` |
 
 `public` documents are visible to everyone whatever college they belong to, so logging in never narrows what a user sees.
 
 ## 3. Knowledge
 
 - Document types: circulars, policies (exam, fee, hostel), placement notices, FAQs.
-- Every document is tagged with college, audience, category, issue date and expiry.
+- Every document is tagged with college (a CampusERP institute code, or `all` for both), audience, category, issue date and expiry.
 - Circulars can be college-specific and get superseded: the newest wins, expired ones are skipped, and the issue date is shown in every citation.
-- All data is invented: about 150 generated documents and mock student records.
+- Documents are written for CampusERP's demo colleges; their content is invented and describes no real institution. Personal records are never copied into the helpdesk: they are read live from CampusERP.
 
 ## 4. Capabilities
 
@@ -30,7 +32,7 @@ A standalone AI assistant that answers campus queries for an invented university
 1. **Grounded answers.** Ingest → hybrid search (vector + keyword) → rerank → answer with citations. The scope filter is applied *before* search so restricted documents can never reach the model. On a weak match the assistant abstains, gives the relevant office contact, and logs the question to an "unanswered" queue.
 2. **Evals and observability.** Golden set including scope-leak and refusal cases; retrieval recall@k; answer faithfulness via LLM-as-judge; CI gate; tracing; cost and latency per answer.
 3. **Conversation.** Rewrite follow-up questions using history; intent router (FAQ / personal / action / out of scope); English first, then Hindi, Marathi and Hinglish, answering in the user's language.
-4. **Tools.** "My fee due", "my attendance" and "my timetable" against a mock student API; one confirm-before-doing action (request a bonafide certificate); the same tools exposed as an MCP server.
+4. **Tools.** "My fees", "my attendance" and "my results" for students and "my leave balance" for staff, read from CampusERP's self-service endpoints as the user; one confirm-before-doing action (request a bonafide certificate, a new CampusERP endpoint); the same tools exposed as an MCP server.
 
 Each level ships as its own demoable, measured milestone.
 
@@ -38,26 +40,30 @@ Each level ships as its own demoable, measured milestone.
 
 5. Scanned circulars, tables, photo upload.
 6. Prompt-injection test set, PII redaction in logs, rate limits, prompt caching, small/large model routing.
-7. Real WhatsApp channel; admin console (unanswered queue, feedback turned into new eval cases, content-gap report).
+7. Real WhatsApp channel; admin console (unanswered queue, feedback turned into new eval cases, content-gap report), ideally as CampusERP pages.
 
 ## 5. Interfaces
 
-- `POST /ingest` — document + tags.
-- `POST /chat` — question, optional login token and optional `pending_action_id` (to confirm an action) → streamed answer with citations.
+The helpdesk API (port 8100 in development):
+
+- `POST /ingest` — document + tags (header `X-API-Key`).
+- `POST /chat` — question, optional `conversation_id` and optional `pending_action_id` (to confirm an action) → streamed answer with citations (Server-Sent Events). Identity comes from the CampusERP session cookie, if present.
 - `POST /feedback` — thumbs up/down.
 - `GET /health`.
 
+### How it plugs into CampusERP
+
+- **Inside CampusERP:** CampusERP's web app forwards `/api/helpdesk/*` to the helpdesk with the browser's cookies, and shows an "Assist" chat panel to logged-in users. The browser only ever talks to CampusERP's own origin.
+- **Identity:** the helpdesk calls CampusERP's `GET /api/v1/auth/me` with the user's `__Host-session` cookie. CampusERP's response gives the user, the institute code and whether the login is linked to a student or a staff member.
+- **CSRF:** a `POST /chat` that carries a CampusERP session must also carry `X-CSRF-Token` equal to the `__Host-csrf` cookie (CampusERP's double-submit rule), checked by the helpdesk.
+- **Tools:** the helpdesk calls CampusERP's self-service endpoints (`fees/my-account`, `teaching/my-attendance`, `exams/my-results`, `hr/my-leave`, `people/my-bonafide-requests`) with the same session, so CampusERP's own permission checks and row-level security decide what comes back.
+- **Public widget:** the same React chat component, built as a script-tag widget for a college's public website. It is anonymous; the only backend concern it adds is a CORS allowlist.
+- **No shared database.** The helpdesk keeps its own Postgres (documents, chunks, conversations, metrics) and never reads CampusERP's tables.
+
 ### UI
 
-- A single React chat component with WhatsApp-style bubbles, served as a web page.
-- The same component is also shipped as an embeddable widget: a script-tag build that a host page can drop in.
-- Which host embeds it (an ERP, a landing page behind an "assist" button) is undecided. The backend stays host-agnostic; the only backend concern the widget adds is an allowlist of origins permitted to call the API (CORS).
-
-### Mock student API
-
-- A small, separate FastAPI service inside this repo that stands in for an ERP.
-- The assistant's tools call it over HTTP with a token, exactly as they would call a real system. The main app never reads the mock data directly.
-- `POST /login` — demo user credentials → signed login token. The mock student API is the only issuer of tokens.
+- Logged-in users: the Assist panel inside CampusERP's web app (built in the CampusERP repo).
+- Public: the React chat component in this repo, as a page and as an embeddable widget.
 
 ## 6. Quality bar
 
@@ -67,7 +73,8 @@ Each level ships as its own demoable, measured milestone.
 
 ## 7. Boundaries
 
-- Fully standalone: no link to the Campus Support project and no dependency on any ERP.
+- Extends CampusERP only through its HTTP API: no shared database, no imports from its code. CampusERP changes needed by the helpdesk (the bonafide endpoint, the `/auth/me` additions, the forwarding and the chat panel) are made in the CampusERP repo following its conventions.
+- No link to the Campus Support project.
 - No real institution data of any kind.
 - Retrieval and the tool loop are written by hand first; a framework is brought in only if it is later justified.
 
@@ -83,17 +90,15 @@ Each level ships as its own demoable, measured milestone.
 |------|----------|-------|
 | 2026-10-01 | v1 = levels 1 to 4 | Confirmed as proposed. |
 | 2026-10-01 | Languages: English first, then Hindi, Marathi and Hinglish, within v1 | Confirmed as proposed. Implies multilingual embedding and reranking models and golden-set cases per language. |
-| 2026-10-01 | Mock student API is a separate service in this repo | Refined from "inside this repo": own process, called over HTTP. |
 | 2026-10-01 | UI: React chat component plus embeddable script-tag widget in v1 | Changed from "web only". Host page remains undecided. |
 | 2026-10-01 | Spec lives at `docs/spec.md`, Markdown with Mermaid diagrams | |
 | 2026-10-01 | LLM: `qwen3.5:4b` on the homelab Ollama | Gemini (via an AI Studio key) was considered and dropped. 8k context, speed and Indic-language quality are accepted risks, measured by evals. |
 | 2026-10-01 | Embeddings: BGE-M3 on Ollama | Multilingual, 1024-dim. Fixes the vector column size. |
 | 2026-10-01 | Reranker: `bge-reranker-v2-m3` on the mini | Added after a no-reranker baseline. Serving method open. |
 | 2026-10-01 | Tracing: OpenTelemetry SDK with Phoenix | |
-| 2026-10-01 | Login tokens are issued by the mock student API | RS256 JWT, verified by the chat API through JWKS. |
 | 2026-10-01 | Models run on the mini; CI uses a self-hosted runner there | Development and CI depend on the tailnet. |
 | 2026-10-01 | `public` documents are visible across all colleges | College restricts only `student` and `staff` documents. |
-| 2026-10-01 | Interface additions: `POST /login` on the mock student API; optional `pending_action_id` on `/chat` | |
+| 2026-10-01 | Interface addition: optional `pending_action_id` on `/chat` | |
 | 2026-10-01 | Supersession is modelled as series + version | One current version per series, enforced by the database. |
 | 2026-10-01 | Faithfulness judge: `qwen3.5:4b` (same model as the generator) | Known weakness. Claim-level judging, calibration against hand labels, gated only above 85% agreement. |
 | 2026-10-01 | Corpus: about 130 English documents plus about 20 Hindi/Marathi circulars | |
@@ -102,9 +107,15 @@ Each level ships as its own demoable, measured milestone.
 | 2026-10-01 | Build order M0 to M7 | Evals (M2) come before retrieval improvements (M3). |
 | 2026-10-01 | Stand-in models (`AI_BACKEND=fake`) for tests, CI fast tier and offline work | Word-matching toys: they prove plumbing and scope, not answer quality. |
 | 2026-10-01 | CI fast tier on GitHub runners with stand-in models; slow tier on the mini | Changed from "all CI on the mini" (section 10.8). |
-| 2026-10-01 | First corpus: 35 documents (incl. 4 Hindi/Marathi) instead of about 150 | Grows once a real-model baseline exists. Golden set: 87 cases (79 + 2 follow-up + 6 tool). |
+| 2026-10-01 | First corpus: 33 documents (incl. 4 Hindi/Marathi) instead of about 150 | Grows once a real-model baseline exists. Golden set: 88 cases (78 + 2 follow-up + 8 tool). |
 | 2026-10-01 | Reranker called over HTTP in the Hugging Face text-embeddings-inference format (`RERANKER=http`) | Works with a TEI container on the mini; Ollama rerank support still unconfirmed. |
 | 2026-10-01 | MCP confirm-before-doing uses a `confirm` argument | MCP has no pending-action id; the tool returns `needs_confirmation` first. |
+| 2026-10-01 | **Campus Helpdesk is an extension of CampusERP**, not a standalone app | Replaces "fully standalone, invented university". Users, colleges and records come from CampusERP; the mock student API and its JWT logins are removed. |
+| 2026-10-01 | Separate repo and service; CampusERP's web app forwards `/api/helpdesk/*` and hosts the chat panel | Keeps LLM and pgvector dependencies out of CampusERP and its module boundaries intact. |
+| 2026-10-01 | Bonafide requests become a CampusERP endpoint | `POST/GET /api/v1/people/my-bonafide-requests`, plus an office list; built in the CampusERP repo. |
+| 2026-10-01 | "My results" replaces "my timetable" | CampusERP has no timetable endpoint; results, fees, attendance and leave already exist. |
+| 2026-10-01 | `/auth/me` gains `institute.code` and `person` (student/staff link) | Additive change in CampusERP, needed to map users onto scope and tools. |
+| 2026-10-01 | Tests and evals call CampusERP's real API (`make dev-api`, demo data) | No duplicate fake of CampusERP. Tests that need it skip when it is not running (e.g. on GitHub's runners). |
 
 ## 10. Architecture
 
@@ -112,11 +123,14 @@ Each level ships as its own demoable, measured milestone.
 
 ```mermaid
 flowchart LR
-    subgraph Laptop_or_CI["Laptop / CI job"]
-        UI["Chat UI + widget<br/>(React)"]
-        API["Chat API<br/>(FastAPI)"]
-        SAPI["Mock student API<br/>(FastAPI)"]
+    subgraph ERP["CampusERP (its own repo)"]
+        WEB["Next.js web app<br/>+ Assist chat panel"]
+        EAPI["FastAPI API<br/>auth, fees, attendance,<br/>results, leave, bonafide"]
+    end
+    subgraph HD["Campus Helpdesk (this repo)"]
+        API["Helpdesk API<br/>(FastAPI, :8100)"]
         MCP["MCP server"]
+        PUB["Public widget<br/>(React)"]
         PHX["Phoenix<br/>(trace viewer)"]
     end
     subgraph Mini["Homelab mini"]
@@ -125,23 +139,23 @@ flowchart LR
         RR["Reranker<br/>bge-reranker-v2-m3"]
     end
 
-    UI -- "POST /chat (SSE)" --> API
-    UI -- "POST /login" --> SAPI
+    WEB -- "/api/helpdesk/* (cookies forwarded, SSE)" --> API
+    PUB -- "POST /chat (anonymous)" --> API
+    API -- "GET /auth/me, self-service endpoints<br/>(user's session)" --> EAPI
+    MCP -- "same tool functions" --> EAPI
     API -- "scope-filtered search" --> PG
     API -- "chat, embeddings" --> OLL
     API -- "rerank" --> RR
-    API -- "tools (HTTP + user token)" --> SAPI
-    MCP -- "same tool functions" --> SAPI
     API -- "OTLP spans" --> PHX
 ```
 
 | Component | Responsibility |
 |-----------|----------------|
-| Chat API | `/ingest`, `/chat`, `/feedback`, `/health`. Owns scope enforcement, retrieval, the answer prompt and the tool loop. |
-| Mock student API | Stands in for an ERP: issues login tokens, serves fee, attendance and timetable data, accepts bonafide requests. Separate process, own data. |
-| MCP server | Exposes the level 4 tools over the Model Context Protocol by wrapping the same Python functions the chat API uses. |
-| Chat UI + widget | One React component, built twice: as a page and as a script-tag bundle. |
-| PostgreSQL + pgvector | Documents, chunks with embeddings, the unanswered queue, feedback and per-answer metrics. |
+| Helpdesk API | `/ingest`, `/chat`, `/feedback`, `/health`. Owns scope enforcement, retrieval, the answer prompt and the tool loop. Identifies users through CampusERP. |
+| CampusERP | Source of users, colleges and personal records. Its web app forwards `/api/helpdesk/*` and hosts the Assist panel; its API answers `/auth/me` and the self-service endpoints the tools call. |
+| MCP server | Exposes the level 4 tools over the Model Context Protocol by wrapping the same Python functions the helpdesk API uses. |
+| Public widget | The React chat component as a page and as a script-tag bundle, for a college's public website. Anonymous. |
+| PostgreSQL + pgvector | The helpdesk's own database: documents, chunks with embeddings, conversations, the unanswered queue, feedback and per-answer metrics. Separate from CampusERP's database. |
 | Ollama | Serves the chat model and the embedding model over an OpenAI-compatible HTTP API. |
 | Phoenix | Receives OpenTelemetry spans and shows each answer's prompt, retrieved chunks and timings. |
 
@@ -215,9 +229,12 @@ How it is made hard to get wrong:
 
 ### 10.5 Authentication
 
-- The mock student API plays the identity provider. `POST /login` with a demo user returns a signed JWT (RS256) carrying `sub` (student or staff id), `role`, `college` and `exp`.
-- It publishes its public key at a JWKS endpoint. The chat API verifies signature, issuer, audience and expiry, and never sees the private key.
-- The chat API forwards the same token when a tool calls the mock student API, which enforces "own data only" itself. Replacing the mock with a real identity provider later changes configuration, not code.
+- The helpdesk has no logins. The user signs in to CampusERP, which sets its `__Host-session` (HttpOnly) and `__Host-csrf` cookies.
+- The Assist panel calls `/api/helpdesk/chat` on CampusERP's own origin; CampusERP's web app forwards the request, cookies included, to the helpdesk.
+- The helpdesk picks out only CampusERP's two cookies and calls CampusERP's `GET /api/v1/auth/me` with the session. The answer becomes the user's claims: `sub` = `<institute code>:<user id>`, role (student if the login is linked to a student, otherwise staff), college (institute code), and whether the login is linked to a student or staff member. It is fetched on every chat request, not cached: CampusERP may rotate a session on its next request (after a role or grant change), so the helpdesk lets that happen on `/auth/me`, uses the new token for the rest of the turn, and passes CampusERP's `Set-Cookie` back on the `/chat` response so the browser keeps its session.
+- No session cookie means anonymous. A session CampusERP rejects is a `401`, never anonymous. CampusERP unreachable is a `503`.
+- Every `POST` that carries a session must pass CampusERP's double-submit rule: `X-CSRF-Token` equal to the `__Host-csrf` cookie. Otherwise another site could make a logged-in browser chat, or confirm an action, on the user's behalf.
+- Tools call CampusERP with the same session (and, for `POST`, the CSRF cookie and header), so CampusERP's own permission checks and row-level security apply to every lookup.
 
 ### 10.6 AI stack
 
@@ -255,19 +272,27 @@ Open item: Ollama's support for rerank models is not confirmed. The reranker is 
 
 ### 10.7 Tool loop and MCP
 
-Tools: `get_fee_due`, `get_attendance`, `get_timetable` (read-only) and `request_bonafide` (action).
+Tools, each a call to a CampusERP self-service endpoint as the user:
 
-- **Loop.** The model is given the tool definitions. When it asks for a tool, the chat API runs the Python function, returns the result to the model, and repeats until the model answers in text, with a cap of three rounds.
-- **Identity never comes from the model.** Tool functions take no student id argument. The id comes from the verified token, so the model cannot be talked into fetching another student's data.
-- **Anonymous users.** Tools are not offered; a personal question gets "please log in".
-- **Confirm before doing.** `request_bonafide` does not execute when the model calls it. The chat API stores a pending action and the answer asks the user to confirm. Only a follow-up `/chat` call that carries the pending action id and comes from the same user executes it. This adds one optional field to the `/chat` request body.
-- **MCP.** The MCP server is a thin wrapper that registers the same four functions, so there is one implementation with two front doors. It runs as its own process and requires the same user token.
+| Tool | Offered to | CampusERP endpoint |
+|------|-----------|--------------------|
+| `get_my_fees` | students | `GET /api/v1/fees/my-account` |
+| `get_my_attendance` | students | `GET /api/v1/teaching/my-attendance` |
+| `get_my_results` | students | `GET /api/v1/exams/my-results` |
+| `request_bonafide` (action) | students | `POST /api/v1/people/my-bonafide-requests` |
+| `get_my_leave` | logins linked to a staff member | `GET /api/v1/hr/my-leave` |
+
+- **Loop.** The model is given the tools its user may use. When it asks for one, the helpdesk calls CampusERP, returns a trimmed result to the model, and repeats until the model answers in text, with a cap of three rounds.
+- **Identity never comes from the model.** Tools take no id argument. CampusERP decides whose records to return from the session, so the model cannot be talked into fetching someone else's data.
+- **Anonymous users** get "please log in to CampusERP"; logins linked to neither a student nor a staff member are told there are no personal records to look up.
+- **Confirm before doing.** `request_bonafide` does not execute when the model calls it. The helpdesk stores a pending action and the answer asks the user to confirm. Only a follow-up `/chat` call that carries the pending action id and comes from the same user executes it.
+- **MCP.** The MCP server is a thin wrapper that registers the same five functions, so there is one implementation with two front doors. It runs as its own process with the user's CampusERP session in its environment.
 
 ### 10.8 Running it and CI
 
-- **Development.** `lab up` provisions the project's Postgres database with pgvector on the mini and writes `.env.lab`. The chat API, mock student API and UI run on the laptop. Phoenix runs from `docker-compose`.
+- **Development.** `lab up` provisions the helpdesk's Postgres database with pgvector on the mini and writes `.env.lab` (or `docker compose up -d postgres` locally). CampusERP runs from its own repo (`make dev`: API on :8000, web on :3000); the helpdesk API runs on :8100. Only CampusERP's backend is needed (`make up db-bootstrap migrate seed dev-api`); its web app only for the Assist panel. Phoenix runs from `docker-compose`.
 - **Configuration.** The apps read environment variables only. `.env.lab` is never committed.
-- **CI.** The fast tier (unit tests, scope-leak checks, retrieval metrics) runs on GitHub's own runners with the deterministic stand-in models (`AI_BACKEND=fake`), so the 100% scope-leak gate never depends on the mini. The slow tier runs on a self-hosted runner on the mini, because GitHub's runners cannot reach Ollama. Each run starts a throwaway pgvector container, ingests the document set and runs the golden set.
+- **CI.** The fast tier (unit tests, scope-leak checks, retrieval metrics) runs on GitHub's own runners with the deterministic stand-in models (`AI_BACKEND=fake`); tests that need CampusERP skip there. So the 100% scope-leak gate never depends on the mini. The slow tier runs on a self-hosted runner on the mini, because GitHub's runners cannot reach Ollama. Each run starts a throwaway pgvector container, ingests the document set and runs the golden set.
 - **Self-hosted runner safety.** A self-hosted runner executes whatever a workflow tells it to, on the mini itself. If the repository is public, workflows must not run automatically for pull requests from forks; the repository setting that requires approval for outside contributors must be on before the runner is attached.
 - **Eval run time.** At about 30 tokens per second a full golden-set run with generation takes many minutes. The eval plan therefore separates fast retrieval-only checks from slower answer checks.
 - **Dependency on the mini.** Development and CI need the tailnet and the mini to be up. This was chosen knowingly over a self-contained setup; the configurable Ollama URL is the escape hatch.
@@ -277,18 +302,17 @@ Tools: `get_fee_due`, `get_attendance`, `get_timetable` (read-only) and `request
 ```
 campus-helpdesk/
 ├── apps/
-│   ├── api/              # chat API
-│   │   ├── auth.py       # token verification
+│   ├── api/              # helpdesk API
+│   │   ├── erp.py        # CampusERP client: identity (/auth/me) and self-service calls
 │   │   ├── scope.py      # the one scope builder
 │   │   ├── ingest/       # chunking, embedding, supersession
 │   │   ├── retrieval/    # vector, keyword, fusion, rerank
 │   │   ├── llm/          # LLMClient, Embedder, Reranker
-│   │   ├── tools/        # tool functions and the loop
+│   │   ├── tools/        # tool definitions and the loop
 │   │   └── telemetry.py  # OpenTelemetry setup
-│   ├── student_api/      # mock ERP and token issuer
-│   ├── mcp_server/       # MCP wrapper around tools
-│   └── web/              # React chat component and widget build
-├── data/                 # generated documents and mock records
+│   ├── mcp_server/       # MCP wrapper around the tools
+│   └── web/              # public React chat page and widget build
+├── data/                 # documents for CampusERP's demo colleges
 ├── evals/                # golden set and runners
 ├── docs/
 ├── docker-compose.yml    # Phoenix, local Postgres option
@@ -296,9 +320,11 @@ campus-helpdesk/
 └── .github/workflows/
 ```
 
+The Assist panel, the `/api/helpdesk/*` forwarding, the bonafide endpoint and the `/auth/me` additions live in the CampusERP repo.
+
 ## 11. Data model
 
-Two separate sets of tables live in the project's Postgres database: the chat API's tables (schema `helpdesk`) and the mock student API's tables (schema `student_api`). Neither service queries the other's schema; they talk only over HTTP.
+The helpdesk's tables live in its own Postgres database (schema `helpdesk`). Personal records are not stored here; they stay in CampusERP and are read live through its API. `user_sub` columns hold `<institute code>:<CampusERP user id>`.
 
 ### 11.1 ER diagram (chat API)
 
@@ -454,19 +480,16 @@ The role and college are stored on the conversation for reporting only. Scope is
 
 Conversation text and user ids are stored in plain form in v1, which is acceptable because all data is invented. Redaction of personal data in logs is level 6.
 
-### 11.6 Mock student API (schema `student_api`)
+### 11.6 CampusERP data used (not stored)
 
-| Table | Columns |
-|-------|---------|
-| `users` | `id`, `kind` (`student` or `staff`), `name`, `college_code`, `program`, `year`, `section`, `password_hash` |
-| `fee_dues` | `student_id`, `term`, `amount_due`, `due_date`, `status` |
-| `attendance` | `student_id`, `course_code`, `attended`, `total`, `as_of` |
-| `timetable` | `college_code`, `program`, `year`, `section`, `day`, `slot`, `course_code`, `room` |
-| `bonafide_requests` | `id`, `student_id`, `purpose`, `status`, `created_at` |
+| Data | Where it comes from |
+|------|---------------------|
+| Who the user is, their college, student/staff link | `GET /api/v1/auth/me` |
+| Fees, attendance, results | `fees/my-account`, `teaching/my-attendance`, `exams/my-results` |
+| Leave balances | `hr/my-leave` |
+| Bonafide requests | `people/my-bonafide-requests` (new in CampusERP) |
 
-- Every endpoint reads the student id from the token, so a student can only reach their own rows.
-- In v1 the personal tools serve students. Staff accounts exist for document scope and have no personal records.
-- The signing key for login tokens belongs to this service and is kept outside the database.
+College codes in `documents.college_code` and `offices.college_code` must match CampusERP institute codes.
 
 ### 11.7 Reference data
 
@@ -474,7 +497,7 @@ Conversation text and user ids are stored in plain form in v1, which is acceptab
 
 | Column | Type | Notes |
 |--------|------|-------|
-| `code` | text, PK | Short code; includes the special row `all`. |
+| `code` | text, PK | CampusERP institute code (e.g. `alpha`); includes the special row `all`. |
 | `name` | text | |
 
 `offices`
@@ -620,12 +643,12 @@ Planned first rows: vector only → add keyword search and fusion → add rerank
 | # | Milestone | Scope | Done when |
 |---|-----------|-------|-----------|
 | M0 | Foundations | Repository scaffold (section 10.9); `lab.yml` with Postgres + pgvector; schema migrations for section 11; `/health`; CI fast tier running on the mini's self-hosted runner, with fork-PR approval switched on; `bge-m3` pulled on the mini; data set generated. | CI is green on an empty app; the data set is committed in `data/`. |
-| M1 | Naive RAG | `/ingest` with chunking and embedding; series + version handling; vector-only search with the scope filter; mock student API with `/login` and token verification; `/chat` streaming a cited answer. | A question asked through Swagger as anonymous, student and staff returns correctly scoped, cited answers. |
+| M1 | Naive RAG | `/ingest` with chunking and embedding; series + version handling; vector-only search with the scope filter; identity from CampusERP's `/auth/me`; `/chat` streaming a cited answer. | A question asked through Swagger as anonymous, student and staff returns correctly scoped, cited answers. |
 | M2 | Evals and tracing | Golden set (about 80 cases, 60/20 split); eval runner; retrieval metrics; three-layer scope-leak checks; answer metrics; judge with calibration; fast and slow CI tiers; OpenTelemetry spans to Phoenix; `answers` rows written. | The M1 system has a recorded baseline; scope-leak passes 100%; a trace shows prompt, chunks and timings. |
 | M3 | Level 1 complete | Keyword search and Reciprocal Rank Fusion; reranker; abstain threshold, office contact and unanswered queue. Each added as a separate, measured step. | Three new experiment-log rows, each kept or rejected on the numbers; abstain precision and recall reported. |
-| M4 | Chat UI and widget | React chat component with streaming and citations; login as a demo user; thumbs up/down to `/feedback`; script-tag widget build; origin allowlist. | The page works in a browser and the widget works on a plain demo HTML page. |
+| M4 | Chat UI | In CampusERP: `/api/helpdesk/*` forwarding and the Assist panel (streaming, citations, confirm button, thumbs up/down). In this repo: the anonymous public page and script-tag widget; origin allowlist. | A logged-in CampusERP user chats from the Assist panel; the widget works on a plain demo HTML page. |
 | M5 | Level 3: conversation | Follow-up rewriting; intent router; Hindi, Marathi and Hinglish answers; follow-up cases added to the golden set. | Per-language results recorded; the checkpoint in section 13.5 is decided. |
-| M6 | Level 4: tools | Mock data endpoints; hand-written tool loop; `request_bonafide` with the confirm flow; MCP server; tool cases added to the golden set. | A student gets their own fee due, cannot get another student's, and a bonafide request executes only after confirmation; the same tools answer through an MCP client. |
+| M6 | Level 4: tools | CampusERP: bonafide endpoint and the `/auth/me` additions. Helpdesk: hand-written tool loop over CampusERP's self-service endpoints; `request_bonafide` with the confirm flow; MCP server; tool cases added to the golden set. | A student gets their own fee due, cannot get another student's, and a bonafide request executes only after confirmation; the same tools answer through an MCP client. |
 | M7 | v1 release | README with the eval table (held-out cases), tokens and latency per answer, and "what didn't work"; a short demo recording; tag `v1.0`. | A reader can understand what was built and how well it works from the README alone. |
 
 ### 13.3 Why this order
@@ -637,8 +660,8 @@ Planned first rows: vector only → add keyword search and fusion → add rerank
 
 ### 13.4 Data set
 
-- A plan file fixes the invented university: colleges, offices, circular series with versions and dates, and the concrete facts each document must state.
-- Document text is written from the plan in a Claude Code session and committed as static files under `data/`, together with the mock student records. Nothing is generated at run time.
+- A plan file fixes the colleges (CampusERP's demo institutes), offices, circular series with versions and dates, and the concrete facts each document must state.
+- Document text is written from the plan in a Claude Code session and committed as static files under `data/`. Nothing is generated at run time. Personal records come from CampusERP's own demo data (`make seed` there).
 - Golden-set expected facts are copied from the plan, so they are known truths rather than values read back out of generated prose.
 - The set deliberately includes near-duplicates across colleges, superseded versions, expired notices and documents for each audience, because those are what the scope-leak and supersession cases test.
 
