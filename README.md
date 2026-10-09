@@ -1,87 +1,156 @@
 # Campus Helpdesk
 
-An AI helpdesk that extends **[CampusERP](https://github.com/MaheshMoholkar/campus-erp)**, my multi-college ERP (Next.js and FastAPI).
+**Ask your college anything, from inside [CampusERP](https://github.com/MaheshMoholkar/campus-erp).** Students and staff open the Assist panel and ask in English, Hindi, Marathi or Hinglish. Answers come from the college's own circulars, policies and FAQs, with the source and its issue date. "What's my fee due?" or "What's my leave balance?" is looked up live in CampusERP, and "I need a bonafide certificate" files the request once you confirm.
 
-Students and staff ask questions from an "Assist" panel inside CampusERP. The helpdesk answers from the college's circulars, policies, placement notices and FAQs, with citations. It also reads the user's own CampusERP records (fees, attendance, results, leave) through CampusERP's API, and requests a bonafide certificate in CampusERP once the student confirms.
+When the notices don't cover a question, it says so, gives the right office's contact, and logs the question for the college to answer. Everything runs locally, including the LLM.
 
-Full specification: [docs/spec.md](docs/spec.md).
+[![CI](https://github.com/MaheshMoholkar/campus-helpdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/MaheshMoholkar/campus-helpdesk/actions/workflows/ci.yml)
+![FastAPI](https://img.shields.io/badge/FastAPI-Python_3.13-009688)
+![pgvector](https://img.shields.io/badge/Postgres-pgvector-336791)
+![Ollama](https://img.shields.io/badge/LLM-Ollama_qwen3.5-black)
+![MCP](https://img.shields.io/badge/tools-MCP-6e56cf)
 
-## How it fits with CampusERP
+## Features
 
-```
-browser ──► CampusERP web app (Next.js) ──/api/helpdesk/*──► Campus Helpdesk API (:8100)
-                    │                                              │
-                    └──/api/*──► CampusERP API (:8000) ◄───────────┘
-                                 /auth/me, fees, attendance, results, leave, bonafide
-                                 (called with the user's own session)
-```
+- **Cited answers.** Every answer names its sources with their issue dates. Superseded circulars give way to the newest version; expired notices are skipped.
+- **Sees only what you may see.** Anonymous visitors get public notices; students also get their college's student circulars; staff also get staff circulars. Restricted notices never reach the model for the wrong person.
+- **Your own records, live from CampusERP.** Fees, attendance and results for students; leave balance for staff. Asked as you, so CampusERP's own access rules decide what comes back.
+- **Confirm before doing.** A bonafide certificate request is only filed after you press Confirm.
+- **Knows when to stop.** A weak match gets the office contact instead of a guess, and lands in an unanswered queue.
+- **Follow-ups and four languages.** "And the last date?" is understood from the conversation; replies come in the language you asked in.
+- **Same tools over MCP**, so Claude Desktop or an IDE can use them too.
+- **Public widget.** One script tag puts an anonymous version on a college's website.
+- **Measured.** An 88-case golden set, including scope-leak cases that must always pass, gates every change in CI.
 
-- **Users, colleges and records come from CampusERP.** The helpdesk has no logins of its own: it forwards the user's CampusERP session to `GET /auth/me` to find out who is asking. CampusERP's own access rules then decide what every lookup returns.
-- **Its own service, its own database.** The helpdesk is a separate FastAPI service with its own Postgres (documents, embeddings, conversations, metrics), so LLM and pgvector dependencies stay out of CampusERP.
-- **CampusERP side:** a few changes, made in that repo: `/api/helpdesk/*` forwarding, the Assist panel, a bonafide-request endpoint, and `institute.code` and `person` added to `/auth/me`.
+## How it works
 
-## What it does
-
-- **Grounded answers with citations.** Hybrid search (pgvector + Postgres full-text, merged with Reciprocal Rank Fusion), an optional reranker, and a streamed answer citing numbered sources with their issue dates.
-- **Scope before search.** Anonymous users, students and staff see different documents, per college. The scope filter sits inside the same SQL statement as the search, so a restricted chunk never even leaves the database, let alone reaches the model.
-- **Newest circular wins.** Circulars come in versioned series, and the database refuses two live versions of one series. Expired notices are skipped.
-- **Abstains** when nothing matches well. It gives the right office's contact instead and logs the question to an unanswered queue.
-- **Conversation.** Follow-up rewriting, an intent router, and English / Hindi / Marathi / Hinglish.
-- **Tools over CampusERP.** My fees, my attendance and my results for students; my leave balance for staff. A bonafide request with confirm-before-doing. The same tools are also available as an MCP server.
-- **Public widget.** The same chat as an anonymous one-script-tag widget for a college's public website.
-
-## Layout
-
-```
-apps/api/        helpdesk API: CampusERP client, scope, ingest, retrieval, chat flow, tool loop
-apps/mcp_server/ the tools over MCP (stdio)
-apps/web/        public React chat page and embeddable widget
-data/            documents for CampusERP's demo colleges (alpha, beta)
-evals/           golden set (88 cases), judge calibration, runner, baselines
-tests/           unit and integration tests
+```mermaid
+flowchart LR
+    B[Browser] --> W[CampusERP web app<br/>Assist panel]
+    W -- "/api/helpdesk/*" --> H[Campus Helpdesk API]
+    W -- "/api/*" --> E[CampusERP API]
+    H -- "who is this? my fees, attendance,<br/>results, leave, bonafide" --> E
+    H --> P[(Postgres + pgvector)]
+    H --> O[Ollama<br/>qwen3.5 · bge-m3]
 ```
 
-## Run it
+1. The user signs in to **CampusERP**. Its web app forwards `/api/helpdesk/*` to this service with the user's session cookie.
+2. The helpdesk asks CampusERP's `/auth/me` who the user is: their college, and whether they're a student or staff.
+3. Follow-ups are rewritten into standalone questions, and an **intent router** decides: answer from notices, look up personal records, take an action, or decline.
+4. For notices, **hybrid search** (vector + keyword, merged by rank) runs with the user's scope inside the same SQL query, so out-of-scope chunks are never even read. The best chunks go to the **LLM**, which must cite them.
+5. For records, a hand-written **tool loop** calls CampusERP's self-service endpoints as the user.
+6. The answer streams back as Server-Sent Events. Tokens, latency and a trace are stored for every answer.
 
-Needs [uv](https://docs.astral.sh/uv/), Docker, and Node 24 with pnpm. CampusERP runs from its own repo (`make bootstrap seed dev`: API on :8000, web on :3000).
+The full design, with the decisions behind it, is in [`docs/spec.md`](docs/spec.md).
+
+| Piece | On your laptop | Swappable for |
+|---|---|---|
+| Users, colleges, records | CampusERP (its backend is enough) | any API with the same endpoints |
+| Notices, embeddings, conversations | Postgres + pgvector (Docker Compose) | any Postgres with pgvector |
+| LLM | Ollama, `qwen3.5:4b` | any OpenAI-compatible endpoint |
+| Embeddings | Ollama, `bge-m3` (multilingual) | any 1024-dim embedding model |
+| Reranker | off by default | `bge-reranker-v2-m3` over HTTP |
+| Traces | Phoenix (Docker Compose) | any OpenTelemetry backend |
+
+Every provider sits behind an environment variable; `AI_BACKEND=fake` swaps the models for deterministic stand-ins that run anywhere.
+
+## Tech stack
+
+| Area | Tools |
+|---|---|
+| API | FastAPI, Python 3.13, psycopg 3, Pydantic |
+| Retrieval | PostgreSQL 17 + pgvector, Postgres full-text search, Reciprocal Rank Fusion |
+| AI | Ollama (`qwen3.5:4b`, `bge-m3`) through the OpenAI SDK; hand-written tool loop; MCP server |
+| Chat UI | React 19, Vite (page and script-tag widget); the in-app panel lives in CampusERP |
+| Evals | 88-case golden set, retrieval recall@k, LLM judge with calibration, CI gate |
+| Observability | OpenTelemetry, Phoenix |
+| Testing | pytest against real Postgres and the real CampusERP API |
+| Infrastructure | Docker Compose, GitHub Actions |
+
+## Run it locally
+
+### Requirements
+
+- [CampusERP](https://github.com/MaheshMoholkar/campus-erp)'s backend: in that repo, `make bootstrap seed dev-api` (API on port 8000). Its web app (`make dev`) is needed only for the Assist panel.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [uv](https://docs.astral.sh/uv/) (Python)
+- [Ollama](https://ollama.com), or set `AI_BACKEND=fake` to try it without models
+- [Node.js 24](https://nodejs.org) and [pnpm 11](https://pnpm.io), for the public widget only
+
+### 1. Install and configure
 
 ```bash
-docker compose up -d postgres                  # the helpdesk's own pgvector, on localhost:5433
-cp .env.example .env                           # AI_BACKEND, ERP_API_URL
-uv sync
-uv run python -m apps.api.cli load-data        # documents (add --fake to work offline)
-uv run uvicorn apps.api.main:app --port 8100   # CampusERP's web app forwards /api/helpdesk/* here
+git clone https://github.com/MaheshMoholkar/campus-helpdesk.git
+cd campus-helpdesk
+cp .env.example .env      # set OLLAMA_BASE_URL, or AI_BACKEND=fake
+make setup
+ollama pull qwen3.5:4b && ollama pull bge-m3
 ```
 
-Then log in to CampusERP at http://localhost:3000 (for example `student@alpha.test`, password `campus-demo-password`) and open Assist.
+### 2. Start it
 
-Only CampusERP's backend is needed for the helpdesk itself: `make up db-bootstrap migrate seed dev-api` in the CampusERP repo. Its web app (`make dev-web`) is needed only for the Assist panel.
+```bash
+make up          # the helpdesk's Postgres on port 5433
+make load-data   # colleges, offices and notices
+make dev         # the helpdesk API → http://localhost:8100
+```
 
-**Models.** `AI_BACKEND=ollama` uses `qwen3.5:4b` and `bge-m3` through Ollama (`OLLAMA_BASE_URL`, by default the homelab mini). `AI_BACKEND=fake` uses deterministic word-matching stand-ins: everything runs offline, but the answers are quotes, not generated text.
+### 3. Try it
 
-**API.** `POST /ingest` (header `X-API-Key`), `POST /chat` (Server-Sent Events; a `POST` carrying the CampusERP session must also send `X-CSRF-Token`), `POST /feedback`, `GET /health`. OpenAPI docs are at `http://localhost:8100/docs`.
+Open CampusERP at <http://localhost:3000>, sign in as `student@alpha.test` (password `campus-demo-password`) and press **Assist**. Ask "What is the revaluation fee?", "hostel ka gate kitne baje band hota hai?", "What is my fee due?" or "I need a bonafide certificate for my bank account". Sign in as `teacher@alpha.test` for staff notices and "What is my leave balance?".
 
-**MCP.** `CAMPUS_ERP_SESSION=<session cookie> CAMPUS_ERP_CSRF=<csrf cookie> uv run python -m apps.mcp_server.server` (client config example in the file).
+`make help` lists every command.
+
+## Configuration
+
+Everything lives in `.env`; [`.env.example`](.env.example) documents each variable. The ones you're most likely to change:
+
+| Variable | What it controls |
+|---|---|
+| `AI_BACKEND` | `ollama`, or `fake` for deterministic stand-ins (no models needed) |
+| `OLLAMA_BASE_URL`, `LLM_MODEL`, `EMBED_MODEL` | Where the models are and which ones |
+| `ERP_API_URL` | CampusERP's API (default `http://localhost:8000`) |
+| `RETRIEVAL_MODE`, `RERANKER`, `ABSTAIN_THRESHOLD` | Vector-only or hybrid search, the reranker, and when to decline |
+| `CORS_ORIGINS` | Sites allowed to embed the public widget |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Where traces go; leave unset to export nothing |
 
 ## Tests and evals
 
 ```bash
-uv run pytest -q                       # needs the compose Postgres and CampusERP's API (else those tests skip)
-uv run python -m evals.run --tier fast # retrieval + scope leaks, no LLM calls, no CampusERP
-uv run python -m evals.run --tier slow # full answers, judge, and tools against CampusERP's API
+make test        # pytest; CampusERP-backed tests skip if its API isn't running
+make eval        # retrieval and scope-leak metrics, no LLM calls
+make eval-slow   # full answers, LLM judge and tool cases against CampusERP
+make check       # lint, format check, web build
 ```
 
-CI runs the fast tier on every push with fake models; tests that need CampusERP skip there. The slow tier runs on a self-hosted runner on the homelab when prompts, retrieval, models or data change. Scope-leak cases must pass 100%. Any other metric fails the build if it drops more than 0.05 below [evals/baseline.json](evals/baseline.json).
+Scope-leak cases must pass 100%; every other metric fails CI if it drops more than 0.05 below [`evals/baseline.json`](evals/baseline.json). Every change to retrieval, prompts or models is logged in [`docs/experiments.md`](docs/experiments.md).
 
-## Results
+| Run | Scope leaks | recall@5 | Fact match | Abstain recall | p95 latency |
+|---|---|---|---|---|---|
+| Stand-in models (plumbing only) | 0 / 16 | 0.88 | 0.70 | 0.10 | n/a |
+| `qwen3.5:4b` + `bge-m3` | *pending* | | | | |
 
-| Run | Scope leaks | recall@5 | Fact match | Faithfulness | Abstain recall | p95 latency |
-|-----|-------------|----------|------------|--------------|----------------|-------------|
-| Fake models (plumbing only) | 0 / 16 | 0.882 | 0.70 | n/a | 0.10 | n/a |
-| `qwen3.5:4b` + `bge-m3` | *pending: homelab offline* | | | | | |
+The stand-in row proves the pipeline and the scope filter; it says nothing about answer quality.
 
-The fake-model row proves the pipeline and the scope filter work; it says nothing about answer quality. Its misses are exactly the cross-language cases, which a word-matching embedder cannot handle and a multilingual one should.
+## Project structure
+
+```
+apps/
+  api/          helpdesk API
+    erp.py              CampusERP client: who is asking, and their records
+    scope.py            the one place that decides who may see which notices
+    ingest/             chunking, embedding, circular versions
+    retrieval/          vector + keyword search, fusion, rerank
+    llm/                model clients (Ollama, stand-ins)
+    tools/              tool definitions and the tool loop
+    chat.py             the chat flow, streamed as events
+  mcp_server/   the tools over MCP
+  web/          public chat page and script-tag widget
+data/           notices for CampusERP's demo colleges
+evals/          golden set, judge calibration, runner, baselines
+docs/           spec and experiment log
+```
 
 ## What didn't work
 
-*Filled in from [docs/experiments.md](docs/experiments.md) as experiments are kept or rejected.*
+*Filled in from [`docs/experiments.md`](docs/experiments.md) as experiments are kept or rejected.*
