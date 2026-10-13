@@ -51,7 +51,11 @@ def _call(fn, *args) -> dict:
     return {"items": result} if isinstance(result, list) else result
 
 
-READ_ONLY = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
+# All four hints are set on every tool: MCP reads a missing one as the cautious default
+# (destructive, open-world), and some directories reject a tool that leaves any unset.
+READ_ONLY = ToolAnnotations(
+    readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False
+)
 
 
 @server.tool(annotations=READ_ONLY)
@@ -78,7 +82,11 @@ def get_my_leave() -> dict:
     return _call(_erp.my_leave)
 
 
-@server.tool(annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False))
+@server.tool(
+    annotations=ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False
+    )
+)
 def request_bonafide(purpose: str, confirm: bool = False) -> dict:
     """Request a bonafide certificate for the logged-in student in CampusERP.
 

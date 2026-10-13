@@ -36,3 +36,12 @@ def test_tools_listed_and_working(monkeypatch, login, erp):
     assert call("get_my_fees", {})["due_now"] == "20000.00"  # CampusERP demo data
     assert call("request_bonafide", {"purpose": "passport"})["status"] == "needs_confirmation"
     assert call("request_bonafide", {"purpose": "passport", "confirm": True})["status"] == "requested"
+
+
+def test_every_tool_sets_all_four_hints():
+    from apps.mcp_server import server as mcp_module
+
+    for tool in asyncio.run(mcp_module.server.list_tools()):
+        hints = tool.annotations
+        for hint in ("read_only_hint", "destructive_hint", "idempotent_hint", "open_world_hint"):
+            assert isinstance(getattr(hints, hint), bool), (tool.name, hint)
